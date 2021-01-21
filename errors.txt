@@ -1,0 +1,8 @@
+sudo -u postgres psql
+psql: error: could not connect to server: No such file or directory
+        Is the server running locally and accepting
+        connections on Unix domain socket "/var/run/postgresql/.s.PGSQL.5432"?
+solution: sudo service postgresql restart
+sudo -u postgres psql -f create_database.sql
+psql:create_database.sql:2: WARNING:  could not flush dirty data: Function not implemented
+
