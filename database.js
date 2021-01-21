@@ -5,16 +5,27 @@ var pg = require('pg');
 class ShopRepository {
   constructor(pool) {
     this.pool = pool;
+    this.text_columns = ['title', 'author', 'genre', 'publisher', 'binding', 'description'];
+    this.num_columns = ['price', 'publication year'];
   }
 
   async retrieveBasic(property, value){
     try {
-      // Nie do końca wiem co z tym zrobić - jeżeli zostawię tak, to jest możliwość SQL injection.
-      // Żeby to naprawić, musiałabym użyć parametrów - ale wtedy nie mogę wziąć nazwy kolumny jako parametru.
-      var sql = 'select id, title, author, image_path, price from products '
-      + (property ? `where ${property} like '%${value}%'` : "");
+      var sql = 'select id, title, author, image_path, price from products ';
 
-      var result = await this.pool.query(sql);
+      // Make sure property is a valid column name.
+      if (this.text_columns.includes(property)){
+        value = `%${value}%`
+        sql += `where ${property} like $1`;
+      }
+      else if (this.num_columns.includes(property)) {
+        sql += `where ${property} = $1`;
+      }
+      else if (property){
+        return [];
+      }
+
+      var result = await this.pool.query(sql, property ? [value] : []);
       return result.rows;
     }
     catch (err) {

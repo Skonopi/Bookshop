@@ -6,7 +6,6 @@ https://uniwroc-my.sharepoint.com/:w:/g/personal/310566_uwr_edu_pl/EbrY35Gxc1VGk
 Aby uruchomić aplikację, należy pobrać PostgreSQL.
 ```
 sudo apt install postgresql postgresql-client-common
-sudo -u postgres psql
 ```
 Następnie stworzyć bazę poleceniami (podać hasło użytkownika app "password")
 ```
