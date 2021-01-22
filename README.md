@@ -12,7 +12,7 @@ Następnie stworzyć bazę poleceniami (podać hasło użytkownika app "password
 sudo -u postgres psql -f create_database.sql
 psql -U app -d shop -h localhost -f create_table.sql
 ```
-Na koniec zainstalować moduł `pg` poleceniem
-`sudo npm install pg`.
+Na koniec zainstalować potrzebne moduły w folderze repozytorium poleceniem
+`sudo npm install`.
 
 Zdjęcia pochodzą z domeny publicznej.
