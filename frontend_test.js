@@ -4,7 +4,7 @@ const express = require('express');
 var app = express();
 
 var books = [];
-for(var i = 0; i < 3; i++){
+for(var i = 0; i < 17; i++){
     book = {
         title: "Harry Potter " + (i+1),
         author: "J. K. Rowling",
@@ -13,11 +13,13 @@ for(var i = 0; i < 3; i++){
     };
     books[i] = book;
 }
+genres = ['fantasy', 'criminal', 'sci-fi'];
+publishers = ['us'];
 // app.set('views', '/views');
 app.use( express.static( 'public' ) );
 app.get('/', (req, res) => {
     titles = ['hp1', 'hp2', 'hp3']
-    res.render('index.ejs', { books: books, genres: genres });
+    res.render('index.ejs', { books: books, genres : genres, publishers: publishers });
 });
 
 
