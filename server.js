@@ -2,6 +2,7 @@ const http = require('http');
 const express = require('express');
 const ejs = require('ejs');
 const cookieParser = require('cookie-parser');
+
 const  db = require('./database');
 
 var app = express()
@@ -21,16 +22,24 @@ app.get('/', async (req,res) => {
             res.cookie('usertype','anonim');
             console.log("Added usertype cookie");
         }
+        if (!req.cookies.filter){
+            res.cookie('filter',{});
+            console.log("Added filter cookie");
+        }
         var keyword = req.query.keyword;
         var books;
+        //var genres = await db.getGenres();
+        //var publishers = await db.getPublishers();
+        var genres = (await db.getGenres()).map(function(g){return g.name});
+        var publishers = (await db.getPublishers()).map(function(g){return g.name});
         if (keyword) {
             books = await db.getMatchingProducts('title',keyword);
         }
         else {
             books = await db.getAllProducts();
         }
-        console.log(books);
-        res.render('index.ejs',{'books':books,'keyword':keyword});
+        res.render('index.ejs',{'books':books,'keyword':keyword,'genres':genres,'publishers':publishers});
+
         
     } catch (error) {
         console.log("Error while reading database");
@@ -43,7 +52,9 @@ app.get('/', async (req,res) => {
 app.post('/', (req,res) => {
     console.log("POST");
     var search = req.body.searchbar;
-    console.log("Searching for: " + req.body.searchbar);
+    console.log("Searching for: " + search);
+    var filter = req.body.filter;
+    console.log("Filter option: " + filter)
     if(search){
         res.redirect('/?keyword='+search);
     }
