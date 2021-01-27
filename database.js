@@ -1,7 +1,7 @@
 module.exports = {
   getAllProducts, getSomeProducts, getMatchingProducts, 
   getProductDetails, getGenres, getPublishers, 
-  getProductsByRange, insertProduct, deleteProduct
+  insertProduct, deleteProduct
 };
 
 const pg = require('pg');
@@ -11,9 +11,10 @@ class ShopRepository {
     this.pool = pool;
     this.text_columns = ['title', 'author', 'description'];
     this.num_columns = ['price', 'publication year'];
+    this.id_columns = ['id'];
   }
 
-  constructSelectQuery(table, columns, query_type, property, limit, offset) {
+  constructSelectQuery(table, columns, conditions, limit, offset) {
     // Variables table and columns are visible only to internal functions, 
     // so there is no danger of SQL Injection. 
     var sql;
@@ -24,62 +25,65 @@ class ShopRepository {
       sql = `select * from ${table}`;
     }
 
-    if (query_type == 'text') {
-      // Make sure property is a text column name.
+    // Construct 'where' clause and the array of parameters.
+    var clauses = [];
+    var values = [];
+    var n = 1;
+    for (var property in conditions) {
+      // For each property in conditions, construct a proper constraint.
+      var constraints = [];
       if (this.text_columns.includes(property)){
-        // Ignore case.
-        sql += ` where upper(${property}) like upper($1)`;
+        for (var value of conditions[property]) {
+          // Ignore case.
+          constraints.push(` upper(${property}) like upper($${n}) `);
+          n++;
+
+          values.push(`%${value}%`);
+        }
       }
-      else {
-        throw "Invalid column name.";
+      else if (this.num_columns.includes(property)){
+        for (var value of conditions[property]) {
+          constraints.push(` ${property} >= $${n} and ${property} <= $${n+1} `);
+          n += 2;
+
+          values.push(value[0]);
+          values.push(value[1]);
+        }
       }
+      else if (this.id_columns.includes(property)) {
+        for (var value of conditions[property]) {
+          constraints.push(` id = $${n} `);
+          n++;
+
+          values.push(value);
+        }
+      }
+
+      // Join the contraints with 'or'.
+      if (constraints.length > 0)
+        clauses.push(` (${constraints.join('or')}) `);
     }
 
-    else if (query_type == 'range') {
-      // Make sure property is a numeric column name.
-      if (this.num_columns.includes(property)){
-        sql += ` where ${property} >= $1 and ${property} <= $2 `;
-      }
-      else {
-        throw "Invalid column name.";
-      }
-    }
-
-    else if (query_type == 'id') {
-      sql += ` where id = $1 `;
-    }
+    // If there is at least one condition, add where clause joining them with 'and'.
+    if (clauses.length > 0)
+      sql += ` where ${clauses.join('and')}`
 
     // Check if there are valid limit and offset parameters.
     if (typeof limit == 'number' && typeof offset == 'number') {
       sql += ` limit ${limit} offset ${offset}`;
     }
-    return sql;
+    return [sql, values];
   }
 
-  async retrieve(table, columns, query_type, property, value1, value2, limit, offset) {
+  async retrieve(table, columns, conditions, limit, offset) {
     try {
-      var sql = this.constructSelectQuery(table, columns, query_type, property, limit, offset);
-
-      // Construct list of parameters for the query.
-      var values = [];
-      if (query_type == 'text') {
-        values = [`%${value1}%`];
-      }
-      else if (query_type == 'range') {
-        values = [value1, value2];
-      }
-      else if (query_type == 'id') {
-        values = [value1];
-      }
+      var [sql, values] = this.constructSelectQuery(table, columns, conditions, limit, offset);
 
       var result = await this.pool.query(sql, values);
       return result.rows;
     }
     catch (err) {
-      if (err == "Invalid column name.")
-        throw err;
-      else
-        throw "Database error.";
+      throw "Database error.";
     }
   }
 
@@ -157,18 +161,20 @@ async function getAllProducts() {
  * @param {number} offset 
  */
 async function getSomeProducts(limit, offset) {
-  var res = await repo.retrieve('products', ['id', 'title', 'author', 'image_path', 'price'], 'all', null, null, null, limit, offset);
+  var res = await repo.retrieve('products', ['id', 'title', 'author', 'image_path', 'price'], null, limit, offset);
   return res;
 }
 
 /**
- * Get all products where property contains substring given by value.
- * Valid properties: title, author, description.
- * @param {string} property
- * @param {string} value 
+ * Get all products where that match given conditions.
+ * Conditions is a dictionary of form property: list of possible values.
+ * For text properties values are strings and for numeric properties values are lists [min_value, max_value].
+ * Valid text properties: title, author, description.
+ * Valid numeric properties: price, publication_year.
+ * @param {object} conditions
  */
-async function getMatchingProducts(property, value) {
-  var res = await repo.retrieve('products', ['id', 'title', 'author', 'image_path', 'price'], 'text', property, value);
+async function getMatchingProducts(conditions) {
+  var res = await repo.retrieve('products', ['id', 'title', 'author', 'image_path', 'price'], conditions);
   return res;
 }
 
@@ -177,7 +183,7 @@ async function getMatchingProducts(property, value) {
  * @param {number} id 
  */
 async function getProductDetails(id) {
-  var res = await repo.retrieve('products', null, 'id', 'id', id);
+  var res = await repo.retrieve('products', null, {'id': [id]});
   return res;
 }
 
@@ -194,18 +200,6 @@ async function getGenres() {
  */
 async function getPublishers() {
   var res = await repo.retrieve('publishers');
-  return res;
-}
-
-/**
- * Get all products where property is between low and high.
- * Valid properties: price, publication_year.
- * @param {string} property 
- * @param {number} low 
- * @param {number} high 
- */
-async function getProductsByRange(property, low, high) {
-  var res = await repo.retrieve('products', ['id', 'title', 'author', 'image_path', 'price'], 'range', property, low, high);
   return res;
 }
 
