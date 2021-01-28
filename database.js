@@ -9,7 +9,7 @@ const pg = require('pg');
 class ShopRepository {
   constructor(pool) {
     this.pool = pool;
-    this.text_columns = ['title', 'author', 'description'];
+    this.text_columns = ['title', 'author', 'description', 'g.name', 'p.name'];
     this.num_columns = ['price', 'publication year'];
     this.id_columns = ['id'];
   }
@@ -19,10 +19,26 @@ class ShopRepository {
     // so there is no danger of SQL Injection. 
     var sql;
     if (columns) {
-      sql = `select ${columns.join(',')} from ${table}`; 
+      sql = `select t.${columns.join(',')} from ${table} t`; 
     }
     else {
       sql = `select * from ${table}`;
+    }
+
+    if (Object.keys(conditions).includes('genre')) {
+      // Genre is stored in a separate table, so it needs to be joined.
+      sql += ' join genres g on genre_id = g.id ';
+      // Column name is now different, so we need to change it in the object.
+      conditions['g.name'] = conditions['genre'];
+      delete conditions['genre'];
+    }
+
+    if (Object.keys(conditions).includes('publisher')) {
+      // Publisher is stored in a separate table, so it needs to be joined.
+      sql += ' join publishers p on publisher_id = p.id ';
+      // Column name is now different, so we need to change it in the object.
+      conditions['p.name'] = conditions['publisher'];
+      delete conditions['publisher'];
     }
 
     // Construct 'where' clause and the array of parameters.
