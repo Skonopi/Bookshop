@@ -21,7 +21,7 @@
         <a class="navbar-brand">Bookshop</a>
         <form method="post">
           <div class="input-group align-self-stretch">
-            <input class="form-control" method="post"  type="search" name="searchbar" placeholder="search" value = "<%=keyword%>">
+            <input class="form-control" type="search" name="searchbar" placeholder="search" value = "<%=searchbar%>">
             <button class="btn btn-outline-secondary" type="submit">Search</button>
           </div>
         </form>
@@ -42,7 +42,7 @@
         <div class="col-md-4 order-md-1 mb-4">
           <h4 class="mb-2">Genre</h4>
           <!-- genres checks -->
-          <form action="\filter?keyword=<%=keyword%>" method="POST">
+          <form action="\filter?type=<%=searchtype%>&searchbar=<%=searchbar%>" method="POST">
             <ul class="list-group list-group-flush mb-3">
               <% for(var i=0; i < Math.min(5, genres.length); i++){%>
                 <label class="list-group-item">

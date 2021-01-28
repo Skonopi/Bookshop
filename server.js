@@ -22,33 +22,62 @@ app.get('/', async (req,res) => {
             res.cookie('usertype','anonim');
             console.log("Added usertype cookie");
         }
+
+        var query_properties = ['title','author','description'];
+        var match = {};
+        //var searchtype=req.query.searchtype;
+        var searchtype = 'title';
+        var searchbar = req.query.searchbar;
+        if(searchbar){
+            match[searchtype]=[searchbar];
+        }
+
         var genrefilter = req.cookies.genrefilter;
         console.log("Genre filter " + genrefilter);
+        if(genrefilter){
+            match.genre_id = [];
+            genrefilter.forEach(g => {
+                match.genre_id.push(g);
+            });
+        }
 
         var publisherfilter = req.cookies.publisherfilter;
         console.log("Publisher filter " + publisherfilter);
+        if(publisherfilter){
+            match.publisher_id = [];
+            publisherfilter.forEach(g => {
+                match.publisher_id.push(g);
+            });
+        }
 
-        var keyword = req.query.keyword;
-        console.log("Searching for: " + keyword);
-        var books;
+        
         var genres = await db.getGenres();
         var publishers = await db.getPublishers();
-        //var genres = (await db.getGenres()).map(function(g){return g.name});
-        //var publishers = (await db.getPublishers()).map(function(g){return g.name});
-        if (keyword) {
-            books = await db.getMatchingProducts('title',keyword);
+        var books;
+
+        console.log("Match:" );
+        if (match){
+            Object.keys(match).forEach( k => {
+                console.log(`${k} : ${match[k]}`);
+            });
+        }
+
+        if (match){
+            books = await db.getMatchingProducts(match);
         }
         else {
             books = await db.getAllProducts();
         }
+
         var references = 
             {'books':books,
-            'keyword':keyword,
+            'searchtype':searchtype,
+            'searchbar':searchbar,
             'genres':genres,
             'publishers':publishers,
             'checkedGenres':genrefilter,
             'checkedPublishers':publisherfilter};
-            
+
         res.render('index_new.ejs',references);
 
         
@@ -85,19 +114,21 @@ app.post('/filter', (req,res) => {
     }
     res.cookie('publisherfilter',publisherfilter);
 
-    var search = req.query.keyword;
-    console.log("keyword " + search);
-    res.redirect('/?keyword='+search);
+    var searchtype = req.query.type;
+    var searchbar = req.query.searchbar;
+    res.redirect(`/?type=${searchtype}&searchbar=${searchbar}`);
 });
 
 app.post('/', (req,res) => {
     try {
         console.log("POST");
 
-        var search = req.body.searchbar;
+        //var searchtype = req.body.type;
+        var searchtype = 'title';
+        var searchbar = req.body.searchbar;
 
-        if(search){
-            res.redirect('/?keyword='+search);
+        if(searchbar){
+            res.redirect(`/?type=${searchtype}&searchbar=${searchbar}`);
         }
         else res.redirect('/');
     } catch (error) {
