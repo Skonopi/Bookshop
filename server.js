@@ -22,23 +22,34 @@ app.get('/', async (req,res) => {
             res.cookie('usertype','anonim');
             console.log("Added usertype cookie");
         }
-        if (!req.cookies.filter){
-            res.cookie('filter',{});
-            console.log("Added filter cookie");
-        }
+        var genrefilter = req.cookies.genrefilter;
+        console.log("Genre filter " + genrefilter);
+
+        var publisherfilter = req.cookies.publisherfilter;
+        console.log("Publisher filter " + publisherfilter);
+
         var keyword = req.query.keyword;
+        console.log("Searching for: " + keyword);
         var books;
-        //var genres = await db.getGenres();
-        //var publishers = await db.getPublishers();
-        var genres = (await db.getGenres()).map(function(g){return g.name});
-        var publishers = (await db.getPublishers()).map(function(g){return g.name});
+        var genres = await db.getGenres();
+        var publishers = await db.getPublishers();
+        //var genres = (await db.getGenres()).map(function(g){return g.name});
+        //var publishers = (await db.getPublishers()).map(function(g){return g.name});
         if (keyword) {
             books = await db.getMatchingProducts('title',keyword);
         }
         else {
             books = await db.getAllProducts();
         }
-        res.render('index.ejs',{'books':books,'keyword':keyword,'genres':genres,'publishers':publishers});
+        var references = 
+            {'books':books,
+            'keyword':keyword,
+            'genres':genres,
+            'publishers':publishers,
+            'checkedGenres':genrefilter,
+            'checkedPublishers':publisherfilter};
+            
+        res.render('index_new.ejs',references);
 
         
     } catch (error) {
@@ -48,17 +59,66 @@ app.get('/', async (req,res) => {
        // res.redirect("/error",{type:"database error",error});
     }
 });
+app.post('/filter', (req,res) => {
+    console.log("POST");
+    var genrefilter = [];
+    var array = req.body.genrefilter;
+
+    if (array) {
+        if (!Array.isArray(array)) {array = [array];}
+        array.forEach(g => {
+            genrefilter.push(parseInt(g.slice(2)));
+        });
+    }
+    res.cookie('genrefilter',genrefilter);
+    
+   
+    var publisherfilter = [];
+
+    array = req.body.publisherfilter;
+    if (array) {
+        if (!Array.isArray(array)) {array = [array];}
+        array.forEach(p => {
+            console.log(p);
+            publisherfilter.push(parseInt(p.slice(2)));
+        });
+    }
+    res.cookie('publisherfilter',publisherfilter);
+
+    var search = req.query.keyword;
+    console.log("keyword " + search);
+    res.redirect('/?keyword='+search);
+});
 
 app.post('/', (req,res) => {
-    console.log("POST");
-    var search = req.body.searchbar;
-    console.log("Searching for: " + search);
-    var filter = req.body.filter;
-    console.log("Filter option: " + filter)
-    if(search){
-        res.redirect('/?keyword='+search);
+    try {
+        console.log("POST");
+
+        var search = req.body.searchbar;
+
+        if(search){
+            res.redirect('/?keyword='+search);
+        }
+        else res.redirect('/');
+    } catch (error) {
+        console.log("Error while reading database");
+        console.log(error);
+        res.end("Error while reading database");
+        // res.redirect("/error",{type:"database error",error});
     }
-    else res.redirect('/');
+});
+
+app.get('/book',async (req,res) => {
+    try {
+        console.log("GET");
+        var bookid = req.guery.id;
+        var book = await db.getProductDetails(parseInt(bookid));
+    } catch (error) {
+        console.log("Error while reading database");
+        console.log(error);
+        res.end("Error while reading database");
+        // res.redirect("/error",{type:"database error",error});
+    }
 });
 
 http.createServer(app).listen(3000);
