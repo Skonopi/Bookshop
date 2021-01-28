@@ -9,9 +9,9 @@ const pg = require('pg');
 class ShopRepository {
   constructor(pool) {
     this.pool = pool;
-    this.text_columns = ['title', 'author', 'description', 'g.name', 'p.name'];
+    this.text_columns = ['title', 'author', 'description'];
     this.num_columns = ['price', 'publication year'];
-    this.id_columns = ['id'];
+    this.id_columns = ['id', 'genre_id', 'publisher_id'];
   }
 
   constructSelectQuery(table, columns, conditions, limit, offset) {
@@ -19,26 +19,10 @@ class ShopRepository {
     // so there is no danger of SQL Injection. 
     var sql;
     if (columns) {
-      sql = `select t.${columns.join(',')} from ${table} t`; 
+      sql = `select ${columns.join(',')} from ${table}`; 
     }
     else {
       sql = `select * from ${table}`;
-    }
-
-    if (conditions && Object.keys(conditions).includes('genre')) {
-      // Genre is stored in a separate table, so it needs to be joined.
-      sql += ' join genres g on genre_id = g.id ';
-      // Column name is now different, so we need to change it in the object.
-      conditions['g.name'] = conditions['genre'];
-      delete conditions['genre'];
-    }
-
-    if (conditions && Object.keys(conditions).includes('publisher')) {
-      // Publisher is stored in a separate table, so it needs to be joined.
-      sql += ' join publishers p on publisher_id = p.id ';
-      // Column name is now different, so we need to change it in the object.
-      conditions['p.name'] = conditions['publisher'];
-      delete conditions['publisher'];
     }
 
     // Construct 'where' clause and the array of parameters.
@@ -68,7 +52,7 @@ class ShopRepository {
       }
       else if (this.id_columns.includes(property)) {
         for (var value of conditions[property]) {
-          constraints.push(` id = $${n} `);
+          constraints.push(` ${property} = $${n} `);
           n++;
 
           values.push(value);
@@ -185,9 +169,12 @@ async function getSomeProducts(limit, offset) {
 /**
  * Get products where that match given conditions. Fetch limit rows at offset.
  * Conditions is a dictionary of form property: list of possible values.
- * For text properties values are strings and for numeric properties values are lists [min_value, max_value].
+ * For text properties values are strings.
+ * For numeric properties values are lists [min_value, max_value].
+ * For id properties values are ids.
  * Valid text properties: title, author, description.
  * Valid numeric properties: price, publication_year.
+ * Valid id properties: id, genre_id, publisher_id.
  * @param {object} conditions
  * @param {number} limit
  * @param {number} offset
