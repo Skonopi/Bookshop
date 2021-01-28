@@ -25,7 +25,7 @@ class ShopRepository {
       sql = `select * from ${table}`;
     }
 
-    if (Object.keys(conditions).includes('genre')) {
+    if (conditions && Object.keys(conditions).includes('genre')) {
       // Genre is stored in a separate table, so it needs to be joined.
       sql += ' join genres g on genre_id = g.id ';
       // Column name is now different, so we need to change it in the object.
@@ -33,7 +33,7 @@ class ShopRepository {
       delete conditions['genre'];
     }
 
-    if (Object.keys(conditions).includes('publisher')) {
+    if (conditions && Object.keys(conditions).includes('publisher')) {
       // Publisher is stored in a separate table, so it needs to be joined.
       sql += ' join publishers p on publisher_id = p.id ';
       // Column name is now different, so we need to change it in the object.
@@ -88,6 +88,7 @@ class ShopRepository {
     if (typeof limit == 'number' && typeof offset == 'number') {
       sql += ` limit ${limit} offset ${offset}`;
     }
+
     return [sql, values];
   }
 
@@ -182,15 +183,17 @@ async function getSomeProducts(limit, offset) {
 }
 
 /**
- * Get all products where that match given conditions.
+ * Get products where that match given conditions. Fetch limit rows at offset.
  * Conditions is a dictionary of form property: list of possible values.
  * For text properties values are strings and for numeric properties values are lists [min_value, max_value].
  * Valid text properties: title, author, description.
  * Valid numeric properties: price, publication_year.
  * @param {object} conditions
+ * @param {number} limit
+ * @param {number} offset
  */
-async function getMatchingProducts(conditions) {
-  var res = await repo.retrieve('products', ['id', 'title', 'author', 'image_path', 'price'], conditions);
+async function getMatchingProducts(conditions, limit, offset) {
+  var res = await repo.retrieve('products', ['id', 'title', 'author', 'image_path', 'price'], conditions, limit, offset);
   return res;
 }
 
