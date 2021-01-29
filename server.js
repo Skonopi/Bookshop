@@ -144,8 +144,8 @@ app.get('/book',async (req,res) => {
         console.log("GET");
         var bookid = req.query.id;
         var book = await db.getProductDetails(parseInt(bookid));
-        // console.log(book);
-        // res.render('index_new.ejs', { 'book':book });
+        console.log(book);
+        res.render('book.ejs', { 'book':book[0], 'searchbar': '', 'searchtype': 'title'});
     } catch (error) {
         console.log("Error while reading database");
         console.log(error);

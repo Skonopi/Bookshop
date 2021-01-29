@@ -12,51 +12,50 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/css/ion.rangeSlider.min.css" />
-
+  <link rel="stylesheet" href="stylesheets/book_view.css" />
 </head>
 
 <body>
   <!-- NAVBAR -->
   <header>
-    <nav class="navbar bg-dark">
+    <nav class="navbar navbar-dark bg-dark fixed-top">
       <div class="container-sm d-flex">
         <a class="navbar-brand">Bookshop</a>
-        <form>
-          <div class="input-group">
-            <input class="form-control" type="search" method="post" name="searchbar" placeholder="search">
+        <form action="/" method="post">
+          <div class="input-group align-self-stretch">
+            <input class="form-control" type="search" name="searchbar" placeholder="search" value="<%=searchbar%>">
             <button class="btn btn-outline-secondary" type="submit">Search</button>
           </div>
         </form>
-        <button class="btn btn-outline-secondary">
+        <button class="btn btn-outline-secondary" id="loginBtn">
           Log in
           <!-- <i class="bi-alarm" style="font-size: 1rem; color: cornflowerblue;"></i> -->
         </button>
-        <button class="btn btn-outline-secondary">
+        <button class="btn btn-outline-secondary" id="cartBtn">
           Cart
           <!-- <i class="bi-alarm" style="font-size: 1rem; color: cornflowerblue;"></i> -->
         </button>
       </div>
     </nav>
   </header>
-  <main>
-    <div class="container-sm">
-      <div class="row">
+  <main class="container">
+      <div class="row row-cols-1 row-cols-sm-2 mb-4 border">
         <!-- COVER -->
-        <div class="col order-md-1 mb-4">
-          <img class="img-fluid" src="<%=book.path%>">
+        <div class="col order-md-1 mb-1">
+          <img class="img-fluid py-3"  src="<%=book.image_path%>">
         </div>
         <!-- MAIN DATA & ADD TO CART -->
-        <div class="col order-md-2 mb-4">
-          <h5 class="text-dark">
+        <div class="col order-md-2 my-3">
+          <h4 class="text-dark">
             <%=book.title%>
+          </h4>
+          <h5 class="text-muted">
+            Author: <%=book.author%>
           </h5>
-          <h6 class="text-muted">
-            <%=book.author%>
-              </h5>
-              <h6 class="text-dark">
-                <%=book.price%>
-                  </h5>
-                  <button class="btn btn-dark" id="book-<%=book.id%>">Add to cart</button>
+          <h5 class="text-dark">
+            <%=book.price%>$
+          </h5>
+          <button class="btn btn-dark" id="book-<%=book.id%>">Add to cart</button>
         </div>
       </div>
       <div class="row">
@@ -77,24 +76,33 @@
           <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab">
             <dl class="row">
               <dt class="col-sm-2 text-muted">Title:</dt>
-              <dd class="col-sm-10"><%=book.title%></dd>
+              <dd class="col-sm-10">
+                <%=book.title%>
+              </dd>
 
               <dt class="col-sm-2 text-muted">Author:</dt>
-              <dd class="col-sm-10"><%=book.author%></dd>
-              
+              <dd class="col-sm-10">
+                <%=book.author%>
+              </dd>
+
               <dt class="col-sm-2 text-muted">Genre:</dt>
-              <dd class="col-sm-10"><%=book.genre%></dd>
+              <dd class="col-sm-10">
+                <%=book.genre%>
+              </dd>
 
               <dt class="col-sm-2 text-muted">Publisher:</dt>
-              <dd class="col-sm-10"><%=book.publisher%></dd>
+              <dd class="col-sm-10">
+                <%=book.publisher%>
+              </dd>
 
               <dt class="col-sm-2 text-muted">Publication year:</dt>
-              <dd class="col-sm-10"><%=book.publication_year%></dd>
+              <dd class="col-sm-10">
+                <%=book.publication_year%>
+              </dd>
             </dl>
           </div>
         </div>
       </div>
-    </div>
   </main>
 
 
