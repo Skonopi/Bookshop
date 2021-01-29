@@ -15,20 +15,58 @@
 
 <body class="text-center h-100">
   <div class="container h-100">
-    <div class="row h-100 justify-content-center align-items-center">
-      <div class="col-10 col-md-8 col-lg-6">
+    <div class="row h-100 align-items-center">
+      <div class="col pe-4 justify-content-end">
+        <h5 class="mb-3">Already have an account? Log in!</h5>
         <form>
           <div class="form-floating mb-3">
-            <input type="email" class="form-control" id="inputEmail" placeholder="Email address">
-            <label for="inputEmail">Email address</label>
+            <input type="email" class="form-control" id="inputEmailLogin" name="inputEmailLogin"
+              placeholder="Email address">
+            <label for="inputEmailLogin">Email address</label>
           </div>
           <div class="form-floating mb-3">
-            <input type="password" class="form-control" id="inputPassword" placeholder="Password">
-            <label for="inputPassword">Password</label>
+            <input type="password" class="form-control" id="inputPasswordLogin" name="inputPasswordLogin"
+              placeholder="Password">
+            <label for="inputPasswordLogin">Password</label>
           </div>
-          <button class="btn btn-dark" type = "submit">Submit</button>
+          <button class="btn btn-dark" type="submit">Log in</button>
         </form>
 
+      </div>
+      <div class="col ps-4 border-start border-dark">
+        <h5 class="mb-3">First time here? Create a new account!</h5>
+        <form>
+          <div class="form-floating border-right mb-3">
+            <input type="text" class="form-control" id="inputNicknameRegister" name="inputNicknameRegister"
+              placeholder="Nickname">
+            <label for="inputNicknameRegister">Nickname</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="inputNameRegister" name="inputNameRegister" placeholder="Name">
+            <label for="inputNameRegister">Name</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="inputSurnameRegister" name="inputSurnameRegister"
+              placeholder="Surname">
+            <label for="inputSurnameRegister">Surname</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="inputEmailRegister" name="inputEmailRegister"
+              placeholder="Email address">
+            <label for="inputEmailRegister">Email address</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="inputPasswordRegister" name="inputPasswordRegister"
+              placeholder="Password">
+            <label for="inputPasswordRegister">Password</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="inputRepeatPasswordRegister" name="inputRepeatPasswordRegister"
+              placeholder="Repeat password">
+            <label for="inputRepeatPasswordRegister">Repeat password</label>
+          </div>
+          <button class="btn btn-dark" type="submit">Register</button>
+        </form>
       </div>
     </div>
 
