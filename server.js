@@ -12,6 +12,7 @@ app.set('view engine','html');
 
 app.use(cookieParser());
 app.use(express.urlencoded({extended:true}));
+app.use(express.static('public'));
 
 app.engine('html',ejs.renderFile);
 
@@ -77,7 +78,6 @@ app.get('/', async (req,res) => {
             'publishers':publishers,
             'checkedGenres':genrefilter,
             'checkedPublishers':publisherfilter};
-
         res.render('index_new.ejs',references);
 
         
@@ -142,8 +142,10 @@ app.post('/', (req,res) => {
 app.get('/book',async (req,res) => {
     try {
         console.log("GET");
-        var bookid = req.guery.id;
+        var bookid = req.query.id;
         var book = await db.getProductDetails(parseInt(bookid));
+        // console.log(book);
+        // res.render('index_new.ejs', { 'book':book });
     } catch (error) {
         console.log("Error while reading database");
         console.log(error);
