@@ -26,6 +26,20 @@ app.get('/', (req, res) => {
     titles = ['hp1', 'hp2', 'hp3']
     res.render('index.ejs', { books: books, genres: genres, publishers: publishers, keyword: 'keyword' });
 });
+var users = [];
+for(var i = 0; i < 10; i++)
+{
+    users.push({
+        id : i,
+        mail : "user" + i + "@email.com",
+        nickname : "user" + i,
+        name : "user" + i,
+        surname : "userowich" + i,
+    });
+}
+app.get('/users', (req, res) => {
+    res.render('users.ejs', { users : users });
+});
 app.get('/book', (req, res) => {
     res.render('book.ejs', { book: books[0] });
 });
