@@ -24,7 +24,7 @@ class ShopRepository {
       sql = `select t.${columns.join(',')} from ${table} t`; 
     }
     else {
-      sql = `select * from ${table}`;
+      sql = `select * from ${table} t`;
     }
 
     if (table == 'users' && columns.includes('role')) {
