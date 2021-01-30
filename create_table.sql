@@ -77,7 +77,7 @@ CREATE TABLE users (
     FOREIGN KEY (role_id) REFERENCES roles(id));
 
 INSERT INTO users (mail, nickname,  name, surname, password, role_id) values
-    ('sherlock.holmes@gmail.com', 'detective', 'Sherlock', 'Holmes', '$2b$12$Q4cqfvE.fp891r6reN3vtOhrtbB1EC6qEUn6UFk2t9cH8aoAfp61a', 2),
+    ('sherlock.holmes@gmail.com', 'detective', 'Sherlock', 'Holmes', '$2b$12$Rk4lSzq2na7wNVOVgxWgkOxaadIpsNOWY143i8d6O3t4xU81M425S', 2),
     ('john.watson@wp.pl', 'doctor', 'John', 'Watson', '$2b$12$sVbpxO92.iuiR6HXBpVXaeeFEy9P.o.QU8K67u6eumOg3xYx.v9vG', 1),
     ('mrshudson@o2.pl', 'landlady', 'Martha', 'Hudson', '$2b$12$P5b4lrfUyNorRwtt1d/Y8OLoCTRx5YYck3Yd7LPjokPCP7ZpBqkFm', 1),
     ('toby@gmail.com', 'woof', 'Toby', 'Sherman', '$2b$12$P5b4lrfUyNorRwtt1d/Y8OLoCTRx5YYck3Yd7LPjokPCP7ZpBqkFm', 1);

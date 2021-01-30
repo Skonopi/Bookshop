@@ -117,7 +117,6 @@ app.post('/filter', (req,res) => {
         });
     }
     res.cookie('genrefilter',genrefilter);
-    
    
     var publisherfilter = [];
 
@@ -130,6 +129,7 @@ app.post('/filter', (req,res) => {
     }
     res.cookie('publisherfilter',publisherfilter);
 
+
     var searchtype = req.query.type;
     var searchbar = req.query.searchbar;
     res.redirect(`/?type=${searchtype}&searchbar=${searchbar}`);
@@ -139,6 +139,7 @@ app.get('/book',async (req,res) => {
     try {
         console.log("GET");
         var bookid = req.query.id;
+        console.log(parseInt(bookid));
         var book = await db.getProductDetails(parseInt(bookid));
         console.log(book);
         res.render('book.ejs', { 'book':book[0], 'searchbar': '', 'searchtype': 'title'});
@@ -153,6 +154,27 @@ app.get('/book',async (req,res) => {
 app.get('/login',(req,res) => {
     res.render('login.ejs');
 });
+app.post('/login',async (req,res) => {
+    console.log('POST login');
+    var email = req.body.email;
+    var pswd = req.body.password;
+
+    var check = (await db.getPasswordByMail(email))[0];
+    console.log(pswd + ' ' + check.password);
+    var result = await bcrypt.compare(pswd,check.password);
+    console.log("HERE");
+    if( result ){
+        res.cookie('user',check.id,{signed:true});
+        if(req.query.returnUrl){
+            res.redirect(req.query.returnUrl);
+        }
+        res.render('index_new.ejs');
+    }
+    else{
+        console.log("Wrong mail or password");
+        res.render('login.ejs');
+    }
+});
 
 //user1 : 'abc'
 //user2: '123'
@@ -166,6 +188,7 @@ async function f(password) {
     var result = await bcrypt.compare( password, hash );
     console.log(result);
 }
+f('abc');
 
 
 function authorize(req,res,next){
