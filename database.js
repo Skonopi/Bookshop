@@ -1,7 +1,9 @@
 module.exports = {
   getAllProducts, getSomeProducts, getMatchingProducts, 
   getProductDetails, getGenres, getPublishers, 
-  insertProduct, deleteProduct
+  insertProduct, deleteProduct,
+  getUsers, getPasswordByMail, getUserById,
+  deleteUser
 };
 
 const pg = require('pg');
@@ -11,7 +13,7 @@ class ShopRepository {
     this.pool = pool;
     this.text_columns = ['title', 'author', 'description'];
     this.num_columns = ['price', 'publication year'];
-    this.id_columns = ['id', 'genre_id', 'publisher_id'];
+    this.id_columns = ['id', 'genre_id', 'publisher_id', 'mail'];
   }
 
   constructSelectQuery(table, columns, conditions, limit, offset) {
@@ -19,10 +21,14 @@ class ShopRepository {
     // so there is no danger of SQL Injection. 
     var sql;
     if (columns) {
-      sql = `select ${columns.join(',')} from ${table}`; 
+      sql = `select t.${columns.join(',')} from ${table} t`; 
     }
     else {
       sql = `select * from ${table}`;
+    }
+
+    if (table == 'users' && columns.includes('role')) {
+      sql += ' join roles r on role_id = r.id ';
     }
 
     // Construct 'where' clause and the array of parameters.
@@ -35,7 +41,7 @@ class ShopRepository {
       if (this.text_columns.includes(property)){
         for (var value of conditions[property]) {
           // Ignore case.
-          constraints.push(` upper(${property}) like upper($${n}) `);
+          constraints.push(` upper(t.${property}) like upper($${n}) `);
           n++;
 
           values.push(`%${value}%`);
@@ -43,7 +49,7 @@ class ShopRepository {
       }
       else if (this.num_columns.includes(property)){
         for (var value of conditions[property]) {
-          constraints.push(` ${property} >= $${n} and ${property} <= $${n+1} `);
+          constraints.push(` t.${property} >= $${n} and ${property} <= $${n+1} `);
           n += 2;
 
           values.push(value[0]);
@@ -52,7 +58,7 @@ class ShopRepository {
       }
       else if (this.id_columns.includes(property)) {
         for (var value of conditions[property]) {
-          constraints.push(` ${property} = $${n} `);
+          constraints.push(` t.${property} = $${n} `);
           n++;
 
           values.push(value);
@@ -128,9 +134,9 @@ class ShopRepository {
     }
   }
 
-  async deleteProduct(id) {
+  async delete(table, id) {
     try {
-      var sql = 'delete from products where id = $1';
+      var sql = `delete from ${table} where id = $1`;
       this.pool.query(sql, [id]);
     }
     catch (err) {
@@ -230,5 +236,39 @@ async function insertProduct(title, author, price, genre, publisher, publication
  * @param {number} id 
  */
 async function deleteProduct(id) {
-  await repo.deleteProduct(id);
+  await repo.delete('products',id);
+}
+
+/**
+ * Get all users.
+ */
+async function getUsers() {
+  var res = await repo.retrieve('users', ['id', 'mail', 'nickname', 'name', 'surname', 'role_id']);
+  return res;
+}
+
+/**
+ * Get id and password of user with given mail.
+ * @param {string} mail 
+ */
+async function getPasswordByMail(mail) {
+  var res = await repo.retrieve('users', ['id', 'password'], {'mail' : [mail]});
+  return res;
+}
+
+/**
+ * Get user with given id.
+ * @param {number} id 
+ */
+async function getUserById(id) {
+  var res = await repo.retrieve('users', ['id', 'mail', 'nickname', 'name', 'surname', 'role'], {'id' : [id]});
+  return res;
+}
+
+/**
+ * Delete user with given id.
+ * @param {number} id 
+ */
+async function deleteUser(id) {
+  await repo.delete('users', id);
 }
