@@ -1,9 +1,9 @@
 module.exports = {
   getAllProducts, getSomeProducts, getMatchingProducts, 
   getProductDetails, getProductDetailsDescriptive, getGenres, getPublishers, 
-  insertProduct, deleteProduct,
+  insertProduct, deleteProduct, updateProduct,
   getUsers, getPasswordByMail, getUserById,
-  deleteUser
+  deleteUser, insertUser, updateUser
 };
 
 const pg = require('pg');
@@ -14,6 +14,10 @@ class ShopRepository {
     this.text_columns = ['title', 'author', 'description'];
     this.num_columns = ['price', 'publication year'];
     this.id_columns = ['id', 'genre_id', 'publisher_id', 'mail'];
+    this.users_columns = ['mail', 'nickname', 'name', 'surname', 'password'];
+    this.products_columns = [
+      'title', 'author', 'price', 'genre_id', 'publisher_id', 
+      'publication_year', 'binding', 'description' ,'image_path']
   }
 
   constructSelectQuery(table, columns, conditions, limit, offset) {
@@ -71,7 +75,7 @@ class ShopRepository {
         }
       }
 
-      // Join the contraints with 'or'.
+      // Join the constraints with 'or'.
       if (constraints.length > 0)
         clauses.push(` (${constraints.join('or')}) `);
     }
@@ -112,38 +116,135 @@ class ShopRepository {
 
       if (genre) {
         // Get id of requested genre.
-        var result = await this.pool.query('select id from genres where upper(name) = upper($1)', [genre]);
+        var result = await this.pool.query('select id from genres where upper(genre) = upper($1)', [genre]);
 
         if (result.rows.length == 0) {
           // If genre does not exist, add it to the table.
-          result = await this.pool.query('insert into genres(name) values($1) returning id', [genre]);
+          result = await this.pool.query('insert into genres(genre) values($1) returning id', [genre]);
         }
         genre = result.rows[0].id;
       }
 
       if (publisher) {
         // Get id of requested publisher.
-        var result = await this.pool.query('select id from publishers where upper(name) = upper($1)', [publisher]);
+        var result = await this.pool.query('select id from publishers where upper(publisher) = upper($1)', [publisher]);
 
         if (result.rows.length == 0) {
           // If publisher does not exist, add it to the table.
-          result = await this.pool.query('insert into publishers(name) values($1) returning id', [publisher]);
+          result = await this.pool.query('insert into publishers(publisher) values($1) returning id', [publisher]);
         }
         publisher = result.rows[0].id;
       }
       
       var values = [title, author, price, genre, publisher, publication_year, binding, description, image_path];
-      this.pool.query(sql, values);
+      await this.pool.query(sql, values);
     }
     catch (err) {
       throw "Database error."
     }
   }
 
+  async constructUpdateQuery(table, columns, id, updates) {
+    // If change of genre is requested, first get its id. If it does not exist, add it to the table.
+    var genre = updates['genre'];
+    if (genre) {
+      var result = await this.pool.query('select id from genres where upper(genre) = upper($1)', [genre]);
+      if (result.rows.length == 0) {
+        result = await this.pool.query('insert into genres(genre) values($1) returning id', [genre]);
+      }
+      updates['genre_id'] = result.rows[0].id;
+    }
+
+    // Do the same for publisher.
+    var publisher = updates['publisher'];
+    if (publisher) {
+      var result = await this.pool.query('select id from publishers where upper(publisher) = upper($1)', [publisher]);
+
+      if (result.rows.length == 0) {
+        result = await this.pool.query('insert into publishers(publisher) values($1) returning id', [publisher]);
+      }
+      updates['publisher_id'] = result.rows[0].id;
+    }
+
+    // Construct 'set' clause.
+    var sql = `update ${table}`, n = 1, changes = [], values = [];
+    for (var property of columns) {
+      if (updates[property]) {
+        changes.push(` ${property} = $${n} `);
+        values.push(updates[property]);
+        n++;
+      }
+    }
+
+    if (changes.length) {
+      sql += ` set ${changes.join(',')} `
+    }
+    else {
+      return ['', []];
+    }
+
+    sql += ` where id = $${n}`;
+    values.push(id);
+
+    return [sql, values];
+  }
+
+  handleUserError(err) {
+    if (err.constraint == 'users_mail_key') {
+      throw "Mail already exists.";
+    }
+    else if (err.constraint == 'users_nickname_key') {
+      throw "Nickname already exists.";
+    }
+    else if (err == "Role does not exist.") {
+      throw "Role does not exist.";
+    }
+    else {
+      throw "Database error.";
+    }
+  }
+
+  async update(table, id, updates) {
+    try {
+      var columns = [];
+      if (table == 'users')
+        columns = this.users_columns;
+      else if (table == 'products')
+        columns = this.products_columns;
+
+        var [sql, values] = await this.constructUpdateQuery(table, columns, id, updates)
+      await this.pool.query(sql, values);
+    }
+    catch (err) {
+      this.handleUserError(err);
+    }
+  }
+
+  async insertUser(mail, nickname, name, surname, password, role) {
+    try {
+      var sql = 'select id from roles where upper(role) = upper($1)';
+      var res = await this.pool.query(sql, [role]);
+      if (res.rows.length == 0) {
+        throw "Role does not exist.";
+      }
+
+      var role_id = res.rows[0].id;
+      sql = `insert into users(
+        mail, nickname, name, surname, password, role_id) 
+      values ($1, $2, $3, $4, $5, $6)`;
+      var values = [mail, nickname, name, surname, password, role_id];
+
+      await this.pool.query(sql, values);
+    }
+    catch (err) {
+      this.handleUserError(err);
+    }
+  }
+
   async delete(table, id) {
     try {
       var sql = `delete from ${table} where id = $1`;
-      this.pool.query(sql, [id]);
+      await this.pool.query(sql, [id]);
     }
     catch (err) {
       throw "Database error."
@@ -257,6 +358,18 @@ async function deleteProduct(id) {
 }
 
 /**
+ * Update product with given id.
+ * Updates is a dictionary of form property: value.
+ * Valid properties: title, author, price, genre, publisher, 
+    publication_year, binding, description, image_path.
+ * @param {number} id 
+ * @param {object} updates 
+ */
+async function updateProduct(id, updates) {
+  await repo.update('products', id, updates);
+}
+
+/**
  * Get all users.
  */
 async function getUsers() {
@@ -288,4 +401,28 @@ async function getUserById(id) {
  */
 async function deleteUser(id) {
   await repo.delete('users', id);
+}
+
+/**
+ * Insert user with given values.
+ * @param {string} mail 
+ * @param {string} nickname 
+ * @param {string} name 
+ * @param {string} surname 
+ * @param {string} password 
+ * @param {string} role 
+ */
+async function insertUser(mail, nickname, name, surname, password, role) {
+  await repo.insertUser(mail, nickname, name, surname, password, role);
+}
+
+/**
+ * Update product with given id.
+ * Updates is a dictionary of form property: value.
+ * Valid properties: mail, nickname, name, surname, password.
+ * @param {number} id 
+ * @param {object} updates 
+ */
+async function updateUser(id, updates) {
+  await repo.update('users', id, updates);
 }
