@@ -2,6 +2,7 @@ const http = require('http');
 const express = require('express');
 const ejs = require('ejs');
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 
 const  db = require('./database');
 
@@ -33,9 +34,19 @@ app.get('/', async (req,res) => {
             match[searchtype]=[searchbar];
         }
 
-        match.genre_id = req.cookies.genrefilter;
+        var genrefilter = []
+        if (req.cookies.genrefilter){
+            genrefilter = req.cookies.genrefilter;
+        }
+        
+        var publisherfilter = [];
+        if(req.cookies.publisherfilter){
+            publisherfilter = req.cookies.publisherfilter;
+        }
 
-        match.publisher_id = req.cookies.publisherfilter;
+        match.genre_id = genrefilter;
+
+        match.publisher_id = publisherfilter;
         
         var genres = await db.getGenres();
         var publishers = await db.getPublishers();
@@ -139,9 +150,23 @@ app.get('/book',async (req,res) => {
     }
 });
 
-app.get('/login',async (req,res) => {
-
+app.get('/login',(req,res) => {
+    res.render('login.ejs');
 });
+
+//user1 : 'abc'
+//user2: '123'
+//user3: 'abc123'
+//user4: 'abc123'
+
+async function f(password) { 
+    var rounds = 12; 
+    var hash = await bcrypt.hash(password, rounds );
+    console.log( hash ); 
+    var result = await bcrypt.compare( password, hash );
+    console.log(result);
+}
+
 
 function authorize(req,res,next){
     async (permissions) => {
