@@ -1,0 +1,9 @@
+/* .row-with-wide-cards .card {
+    width: 100%;
+  } */
+/* .card {
+    width: 100%;
+} */
+body > .container {
+    padding: 70px 15px 0;
+  }
