@@ -1,6 +1,6 @@
 module.exports = {
   getAllProducts, getSomeProducts, getMatchingProducts, 
-  getProductDetails, getGenres, getPublishers, 
+  getProductDetails, getProductDetailsDescriptive, getGenres, getPublishers, 
   insertProduct, deleteProduct,
   getUsers, getPasswordByMail, getUserById,
   deleteUser
@@ -27,8 +27,14 @@ class ShopRepository {
       sql = `select * from ${table} t`;
     }
 
-    if (table == 'users' && columns.includes('role')) {
+    if (table == 'users' && columns && columns.includes('role')) {
       sql += ' join roles r on role_id = r.id ';
+    }
+    if (table == 'products' && columns && columns.includes('genre')) {
+      sql += ' join genres g on genre_id = g.id ';
+    }
+    if (table == 'products' && columns && columns.includes('publisher')) {
+      sql += ' join publishers p on publisher_id = p.id ';
     }
 
     // Construct 'where' clause and the array of parameters.
@@ -196,6 +202,17 @@ async function getMatchingProducts(conditions, limit, offset) {
  */
 async function getProductDetails(id) {
   var res = await repo.retrieve('products', null, {'id': [id]});
+  return res;
+}
+
+/**
+ * Get all details about the product with given id. Get names of genre and publisher instead of id.
+ * @param {number} id 
+ */
+async function getProductDetailsDescriptive(id) {
+  var res = await repo.retrieve('products', 
+  ['id', 'title','author','price', 'genre', 'publisher', 'publication_year', 'binding', 'description' ,'image_path'],
+  {'id': [id]});
   return res;
 }
 

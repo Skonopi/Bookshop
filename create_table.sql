@@ -6,9 +6,9 @@ DROP TABLE IF EXISTS roles;
 
 CREATE TABLE genres (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50));
+    genre VARCHAR(50));
 
-INSERT INTO genres(name) values
+INSERT INTO genres(genre) values
     ('Literatura piękna'),
     ('Fantastyka'),
     ('Science-Fiction'),
@@ -19,9 +19,9 @@ INSERT INTO genres(name) values
 
 CREATE TABLE publishers (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50));
+    publisher VARCHAR(50));
 
-INSERT INTO publishers(name) values
+INSERT INTO publishers(publisher) values
     ('PWN'),
     ('Wydawnictwo literackie'),
     ('Czarna owca'),
