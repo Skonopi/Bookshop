@@ -16,7 +16,7 @@
 <body>
     <header></header>
     <main class="container">
-        <table class="table">
+        <table class="table table-striped table-hover">
             <thead>
                 <tr>
                     <th scope="col">ID</th>
@@ -26,6 +26,17 @@
                     <th scope="col">Surname</th>
                 </tr>
             </thead>
+            <tbody>
+                <% for(var i = 0; i < users.length; i++){%>
+                    <tr>
+                    <th scope="row"><%=users[i].id%></th>
+                    <td><%=users[i].mail%></td>
+                    <td><%=users[i].nickname%></td>
+                    <td><%=users[i].name%></td>
+                    <td><%=users[i].surname%></td>
+                    </tr>
+                <%}%>
+            </tbody>
         </table>
     </main>
 
