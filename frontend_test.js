@@ -1,5 +1,6 @@
 const http = require('http');
 const express = require('express');
+const { O_DIRECT } = require('constants');
 
 var app = express();
 
@@ -26,11 +27,45 @@ app.get('/', (req, res) => {
     titles = ['hp1', 'hp2', 'hp3']
     res.render('index.ejs', { books: books, genres: genres, publishers: publishers, keyword: 'keyword' });
 });
+var users = [];
+for(var i = 0; i < 10; i++)
+{
+    users.push({
+        id : i,
+        mail : "user" + i + "@email.com",
+        nickname : "user" + i,
+        name : "user" + i,
+        surname : "userowich" + i,
+    });
+}
+var products = [];
+for(var i = 0; i < 10; i++)
+{
+    products.push({
+        quantity : i%4 + 1,
+        book : {
+            id : i,
+            title : "book" + i,
+            author: "author" + i,
+            prize: i
+        }
+    })
+}
+var order = {
+    total_cost: 10,
+    products : products
+};
+app.get('/users', (req, res) => {
+    res.render('users.ejs', { users : users });
+});
 app.get('/book', (req, res) => {
     res.render('book.ejs', { book: books[0] });
 });
 app.get('/login', (req, res) => {
     res.render('login.ejs', {});
+});
+app.get('/cart', (req, res) => {
+    res.render('cart.ejs', { order : order });
 });
 
 

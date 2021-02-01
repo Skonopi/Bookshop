@@ -117,6 +117,7 @@ app.post('/filter', (req,res) => {
         });
     }
     res.cookie('genrefilter',genrefilter);
+    
    
     var publisherfilter = [];
 
@@ -129,7 +130,6 @@ app.post('/filter', (req,res) => {
     }
     res.cookie('publisherfilter',publisherfilter);
 
-
     var searchtype = req.query.type;
     var searchbar = req.query.searchbar;
     res.redirect(`/?type=${searchtype}&searchbar=${searchbar}`);
@@ -139,7 +139,6 @@ app.get('/book',async (req,res) => {
     try {
         console.log("GET");
         var bookid = req.query.id;
-        console.log(parseInt(bookid));
         var book = await db.getProductDetails(parseInt(bookid));
         console.log(book);
         res.render('book.ejs', { 'book':book[0], 'searchbar': '', 'searchtype': 'title'});
