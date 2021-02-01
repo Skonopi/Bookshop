@@ -20,10 +20,10 @@ app.engine('html',ejs.renderFile);
 app.get('/', async (req,res) => {
     try {
         console.log("GET index");
-       /* if (!req.cookies.user){
-            res.cookie('usertype','anonim');
-            console.log("Added usertype cookie");
-        }*/
+        var role = null;
+        if (req.signedCookies.role){
+            role = req.signedCookies.role;
+        }
 
         var query_properties = ['title','author','description'];
         var match = {};
@@ -73,7 +73,9 @@ app.get('/', async (req,res) => {
             'genres':genres,
             'publishers':publishers,
             'checkedGenres':genrefilter,
-            'checkedPublishers':publisherfilter};
+            'checkedPublishers':publisherfilter,
+            'role':role
+        };
         res.render('index_new.ejs',references);
 
         
@@ -165,6 +167,7 @@ app.post('/login',async (req,res) => {
         var result = await bcrypt.compare(pswd,check.password);
         if( result ){
             res.cookie('user',check.id,{signed:true});
+            res.cookie('role',check.role,{signed:true});
             if(req.query.returnUrl){
                 res.redirect(req.query.returnUrl);
             }
@@ -185,6 +188,10 @@ app.post('/login',async (req,res) => {
 
 app.get('/cart',authorize('client'),(req,res) => {
     res.render('cart.ejs', { order : {total_cost:0,products:[]} });
+});
+
+app.post('/register',(req,res) =>{
+    //var user = 
 });
 
 //user1 : 'abc'
