@@ -146,7 +146,7 @@
                     <!-- alternativly maybe if(role !=== 'admin') ? -->
                     <% if(role==='user' || role===null){%>
                       <div class="card-footer d-flex align-items-stretch justify-content-center">
-                        <button type="button" name="cartBtn" class="btn btn-dark">Add to cart</button>
+                        <button type="button" name="cartBtn" value="<%=books[i].id%>" class="btn btn-dark">Add to cart</button>
                       </div>
                       <%}%>
                   </div>
@@ -209,13 +209,14 @@
   </script>
   <script>
     var cartBtns = document.getElementsByName("cartBtn");
-    //var loginBtn = document.getElementById("loginBtn");
     console.log(cartBtns);
     cartBtns.forEach(btn =>
       btn.addEventListener('click', function () {
-        //console.log("CART clicked");
-        window.location.href='/cart';
-        //loginBtn.click();
+        var array = localStorage.getItem('cart');
+        if (array) {
+          console.log(btn + btn.value);
+          array.push(parseInt(btn.value));
+        }
       }));
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"

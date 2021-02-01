@@ -17,6 +17,8 @@ app.use(express.static('public'));
 
 app.engine('html',ejs.renderFile);
 
+var emptyregister =  {'email':'','nickname':'','name':'','surname':'','password':''};
+
 app.get('/', async (req,res) => {
     try {
         console.log("GET index");
@@ -43,6 +45,11 @@ app.get('/', async (req,res) => {
         if(req.cookies.publisherfilter){
             publisherfilter = req.cookies.publisherfilter;
         }
+
+        if(req.cookies.prize){
+            match.prize = req.cookies.prize;
+        }
+        
 
         match.genre_id = genrefilter;
 
@@ -132,6 +139,15 @@ app.post('/filter', (req,res) => {
     }
     res.cookie('publisherfilter',publisherfilter);
 
+    var prize = [null,null];
+    if (req.body.prize_min){
+        prize[0] = req.body.prize_min;
+    }
+    if (req.body.prize_max){
+        prize[1] = req.body.prize_max;
+    }
+    res.cookie('prize',prize);
+
     var searchtype = req.query.type;
     var searchbar = req.query.searchbar;
     res.redirect(`/?type=${searchtype}&searchbar=${searchbar}`);
@@ -154,7 +170,7 @@ app.get('/book',async (req,res) => {
 
 app.get('/login',(req,res) => {
     console.log("GET login");
-    res.render('login.ejs',{returnUrl:req.query.returnUrl});
+    res.render('login.ejs',{returnUrl:req.query.returnUrl,register:emptyregister});
 });
 app.post('/login',async (req,res) => {
     console.log('POST login');
@@ -172,17 +188,17 @@ app.post('/login',async (req,res) => {
                 res.redirect(req.query.returnUrl);
             }
             else{
-                res.render('index_new.ejs');
+                res.redirect('/');
             }
         }
         else{
             console.log("Wrong password");
-            res.render('login.ejs',{returnUrl:req.query.returnUrl,error:'Wrong password.'});
+            res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong password.',register:emptyregister});
         }
     }
     else{
         console.log("No user in db.");
-        res.render('login.ejs',{returnUrl:req.query.returnUrl,error:'Wrong mail.'});
+        res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong mail.'});
     }
 });
 
@@ -190,8 +206,42 @@ app.get('/cart',authorize('client'),(req,res) => {
     res.render('cart.ejs', { order : {total_cost:0,products:[]} });
 });
 
-app.post('/register',(req,res) =>{
-    //var user = 
+app.post('/register',async (req,res) =>{
+    var u = {
+        email:req.body.emailRegister,
+        nickname:req.body.nicknameRegister,
+        name:req.body.nameRegister,
+        surname:req.body.surnameRegister,
+        password:req.body.passwordRegister,
+        role:'client'
+    };
+    try{
+        console.log("Trying register");
+        await db.insertUser(u.email,u.nickname,u.name,u.surname,u.password);
+        res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Register completed. You can now log in.',register:emptyregister});
+    }
+    catch(error){
+        console.log("Some error");
+        switch( error ){
+            case 'Mail already exists.':
+                console.log("Szach mat zły mail.");
+                break;
+            case 'Nickname already exists.':
+                console.log("Wymyśl cos orginalnego");
+                break;
+            default:
+                console.log(error);
+                break;
+        }
+        res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Nickname already exists.',register:u});
+    }
+    //res.redirect('/login?returnUrl='+req.url);
+});
+
+app.get('/userslist',async (req,res) => {
+    var users = await db.getUsers();
+    console.log(users[0]);
+    res.render('users.ejs',{users:users});
 });
 
 //user1 : 'abc'
@@ -221,7 +271,7 @@ function authorize(permissions) {
                 }
                 else{
                     console.log(`As ${user.role} you have no acces to requested page.`);
-                    res.render('login.ejs',{returnUrl:req.query.returnUrl,error:`As ${user.role} you have no acces to requested page.`});
+                    res.render('login.ejs',{returnUrl:req.query.returnUrl,message:`As ${user.role} you have no acces to requested page.`});
                 }
             }
             catch (error) {
