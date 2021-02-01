@@ -8,11 +8,11 @@ var books = [];
 for (var i = 0; i < 17; i++) {
     book = {
         id: i,
-        title: "Title " + i,
+        title: "Title" + i,
         author: "Author" + i,
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         price: i * 10.0,
-        path: "cover" + (i % 2 + 1) + ".jpg",
+        image_path: "/images/cover" + (i % 2 + 1) + ".jpg",
         publisher: "publisher" + (i%7),
         publication_year: 1987 + i,
         genre: "Fantasy"
@@ -76,8 +76,8 @@ app.get('/error', (req, res) => {
 app.get('/products', (req, res) => {
     res.render('products.ejs', { products: products});
 });
-app.get('/products/new', (req, res) => {
-    res.render('new_product.ejs', { products: products});
+app.get('/book_admin', (req, res) => {
+    res.render('book_admin.ejs', { book: books[0], genres: ['1', '2', '3', '4'], publishers: ['a', 'b', 'c', 'd']}); // or book : null for adding new book
 });
 
 
