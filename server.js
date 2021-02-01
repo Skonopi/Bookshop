@@ -152,7 +152,7 @@ app.get('/book',async (req,res) => {
 });
 
 app.get('/login',(req,res) => {
-    res.render('login.ejs');
+    res.render('login.ejs',{returnUrl:req.query.returnUrl});
 });
 app.post('/login',async (req,res) => {
     console.log('POST login');
@@ -162,13 +162,16 @@ app.post('/login',async (req,res) => {
     var check = (await db.getPasswordByMail(email))[0];
     console.log(pswd + ' ' + check.password);
     var result = await bcrypt.compare(pswd,check.password);
-    console.log("HERE");
+    console.log(req.query.returnUrl);
     if( result ){
         res.cookie('user',check.id,{signed:true});
         if(req.query.returnUrl){
+            console.log("HERE");
             res.redirect(req.query.returnUrl);
         }
-        res.render('index_new.ejs');
+        else{
+            res.render('index_new.ejs');
+        }
     }
     else{
         console.log("Wrong mail or password");
@@ -185,10 +188,11 @@ async function f(password) {
     var rounds = 12; 
     var hash = await bcrypt.hash(password, rounds );
     console.log( hash ); 
-    var result = await bcrypt.compare( password, hash );
-    console.log(result);
+    var result = await bcrypt.compare( 'abc', '$2b$12$WqnY9kq3nbcoeyLsZ3WpS.N7u8nGG1y4s4eUu6nfSQzhyL7oiBXOi' );
+    //console.log(result);
 }
-f('abc');
+f('123');
+f('abc123');
 
 
 function authorize(req,res,next){

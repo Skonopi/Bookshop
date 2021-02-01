@@ -77,7 +77,7 @@ CREATE TABLE users (
     FOREIGN KEY (role_id) REFERENCES roles(id));
 
 INSERT INTO users (mail, nickname,  name, surname, password, role_id) values
-    ('sherlock.holmes@gmail.com', 'detective', 'Sherlock', 'Holmes', '$2b$12$Rk4lSzq2na7wNVOVgxWgkOxaadIpsNOWY143i8d6O3t4xU81M425S', 2),
-    ('john.watson@wp.pl', 'doctor', 'John', 'Watson', '$2b$12$sVbpxO92.iuiR6HXBpVXaeeFEy9P.o.QU8K67u6eumOg3xYx.v9vG', 1),
-    ('mrshudson@o2.pl', 'landlady', 'Martha', 'Hudson', '$2b$12$P5b4lrfUyNorRwtt1d/Y8OLoCTRx5YYck3Yd7LPjokPCP7ZpBqkFm', 1),
-    ('toby@gmail.com', 'woof', 'Toby', 'Sherman', '$2b$12$P5b4lrfUyNorRwtt1d/Y8OLoCTRx5YYck3Yd7LPjokPCP7ZpBqkFm', 1);
+    ('sherlock.holmes@gmail.com', 'detective', 'Sherlock', 'Holmes', '$2b$12$WqnY9kq3nbcoeyLsZ3WpS.N7u8nGG1y4s4eUu6nfSQzhyL7oiBXOi', 2),
+    ('john.watson@wp.pl', 'doctor', 'John', 'Watson', '$2b$12$WGhsXNTzLWMaPc0uc0QBQupQ143y1uHbwFT/U1llO7s3A.s1S.9wu', 1),
+    ('mrshudson@o2.pl', 'landlady', 'Martha', 'Hudson', '$2b$12$7NHf8wWk1xTZvqjSTMrDquTnZjkA8u59fFY.IX3rwOC8CakDhBA2W', 1),
+    ('toby@gmail.com', 'woof', 'Toby', 'Sherman', '2b$12$7NHf8wWk1xTZvqjSTMrDquTnZjkA8u59fFY.IX3rwOC8CakDhBA2W', 1);
