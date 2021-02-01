@@ -67,6 +67,9 @@ app.get('/login', (req, res) => {
 app.get('/cart', (req, res) => {
     res.render('cart.ejs', { order : order });
 });
+app.get('/admin', (req, res) => {
+    res.render('admin.ejs', { order : order });
+});
 
 
 http.createServer(app).listen(3000);
