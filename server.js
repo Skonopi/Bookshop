@@ -163,7 +163,6 @@ app.post('/login',async (req,res) => {
     console.log(pswd + ' ' + check.password);
     if(check){
         var result = await bcrypt.compare(pswd,check.password);
-        console.log(req.query.returnUrl);
         if( result ){
             res.cookie('user',check.id,{signed:true});
             if(req.query.returnUrl){
@@ -185,7 +184,6 @@ app.post('/login',async (req,res) => {
 });
 
 app.get('/cart',authorize('client'),(req,res) => {
-    console.log("HERE");
     res.render('cart.ejs', { order : {total_cost:0,products:[]} });
 });
 
@@ -207,15 +205,17 @@ async function f(password) {
 
 function authorize(permissions) {
     return async (req,res,next) => {
-        console.log('HERE');
-        console.log(req.signedCookies);
         if (req.signedCookies.user) {
             try{
                 var user = (await db.getUserById(req.signedCookies.user))[0];
                 if( user.role == permissions ){
                     console.log("Logged ->redirect");
                     next();
-                }  
+                }
+                else{
+                    console.log(`As ${user.role} you have no acces to requested page.`);
+                    res.render('login.ejs',{returnUrl:req.query.returnUrl,error:`As ${user.role} you have no acces to requested page.`});
+                }
             }
             catch (error) {
                 console.log("Error while reading database");
