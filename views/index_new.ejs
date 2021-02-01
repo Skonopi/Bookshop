@@ -19,28 +19,37 @@
   <header>
     <nav class="navbar navbar-dark bg-dark fixed-top">
       <div class="container-sm d-flex">
-        <a class="navbar-brand">Bookshop</a>
+        <a class="navbar-brand" href="/">Bookshop</a>
         <form method="post">
           <div class="input-group align-self-stretch">
-            <input class="form-control" type="search" name="searchbar" placeholder="search" value="<%=searchbar%>"/>
+            <input class="form-control" type="search" name="searchbar" placeholder="search" value="<%=searchbar%>" />
             <button class="btn btn-outline-secondary" type="submit">Search</button>
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Category</button>
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">Category</button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="form-control dropdown-item">Title</a></li>
               <li><a class="form-control dropdown-item">Author</a></li>
               <li><a class="form-control dropdown-item">Description</a></li>
             </ul>
-            
+
           </div>
         </form>
-        <button class="btn btn-outline-secondary" id="loginBtn" >
-          Log in
-          <!-- <i class="bi-alarm" style="font-size: 1rem; color: cornflowerblue;"></i> -->
-        </button>
-        <button class="btn btn-outline-secondary" id="cartBtn">
-          Cart
-          <!-- <i class="bi-alarm" style="font-size: 1rem; color: cornflowerblue;"></i> -->
-        </button>
+        <% if(role===null){%>
+          <a class="btn btn-outline-secondary" href="/login">Log in</a>
+          <%} else {%>
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">Profile</button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="form-control dropdown-item">Placeholder</a></li>
+            </ul>
+            <a class="btn btn-outline-secondary" href="/cart">Cart</a>
+            <%}%>
+              <!-- <button class="btn btn-outline-secondary" id="loginBtn">
+                Log in
+              </button>
+              <button class="btn btn-outline-secondary" id="cartBtn">
+                Cart
+              </button> -->
       </div>
     </nav>
   </header>
@@ -111,49 +120,59 @@
 
       <!-- GRID OF BOOKS -->
       <div class="col-md-8 col-lg-9 order-md-2">
-        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4">
-          <% for(var i=0; i < books.length; i++){%>
-            <div class="col d-flex align-items-stretch">
-              <div class="card">
-                <a href="/book?id=<%=books[i].id%>"><img src="<%=books[i].image_path%>" class="card-img-top"
-                    alt="<%=books[i].image_path%>"></a>
-                <div class="card-body">
-                  <h6 class="card-title fw-bold">
-                    <%=books[i].title%>
-                  </h6>
-                  <p class="card-subtitle mb-2 text-muted">
-                    <%=books[i].author%>
-                  </p>
-                  <p class="card-text fw-bold">
-                    <%=books[i].price%> $
-                  </p>
+        <% if(books.length==0) {%>
+          <div class="message">
+            We're sorry. </br>
+            No products matching given filters were found.
+          </div>
+          <%} else {%>
+            <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4">
+              <% for(var i=0; i < books.length; i++){%>
+                <div class="col d-flex align-items-stretch">
+                  <div class="card">
+                    <a href="/book?id=<%=books[i].id%>"><img src="<%=books[i].image_path%>" class="card-img-top"
+                        alt="<%=books[i].image_path%>"></a>
+                    <div class="card-body">
+                      <h6 class="card-title fw-bold">
+                        <%=books[i].title%>
+                      </h6>
+                      <p class="card-subtitle mb-2 text-muted">
+                        <%=books[i].author%>
+                      </p>
+                      <p class="card-text fw-bold">
+                        <%=books[i].price%> $
+                      </p>
+                    </div>
+                    <!-- alternativly maybe if(role !=== 'admin') ? -->
+                    <% if(role==='user' || role===null){%>
+                      <div class="card-footer d-flex align-items-stretch justify-content-center">
+                        <button type="button" name="cartBtn" class="btn btn-dark">Add to cart</button>
+                      </div>
+                      <%}%>
+                  </div>
                 </div>
-                <div class="card-footer d-flex align-items-stretch justify-content-center">
-                  <button type="button" name="cartBtn" class="btn btn-dark">Add to cart</button>
-                </div>
-              </div>
+                <%}%>
             </div>
-            <%}%>
-        </div>
 
-        <nav aria-label="Page navigation example">
-          <ul class="pagination justify-content-center">
-            <li class="page-item">
-              <a class="page-link" href="#" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-              <a class="page-link" href="#" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
+            <nav aria-label="Page navigation example">
+              <ul class="pagination justify-content-center">
+                <li class="page-item">
+                  <a class="page-link" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                  <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
       </div>
+      <%}%>
     </div>
   </main>
 
@@ -178,21 +197,21 @@
     var loginBtn = document.getElementById("loginBtn");
     loginBtn.addEventListener('click', function () {
       //console.log("LOG");
-      window.location.href='/login?returnUrl=' + window.location.href;
+      window.location.href = '/login?returnUrl=' + window.location.href;
     });
   </script>
   <script>
     var cartBtn = document.getElementById("cartBtn");
     cartBtn.addEventListener('click', function () {
       //console.log("LOG");
-      window.location.href='/cart';
+      window.location.href = '/cart';
     });
   </script>
   <script>
     var cartBtns = document.getElementsByName("cartBtn");
     //var loginBtn = document.getElementById("loginBtn");
     console.log(cartBtns);
-    cartBtns.forEach( btn =>
+    cartBtns.forEach(btn =>
       btn.addEventListener('click', function () {
         //console.log("CART clicked");
         window.location.href='/cart';
