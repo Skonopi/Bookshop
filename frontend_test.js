@@ -70,6 +70,9 @@ app.get('/cart', (req, res) => {
 app.get('/admin', (req, res) => {
     res.render('admin.ejs', { order : order });
 });
+app.get('/error', (req, res) => {
+    res.render('error.ejs', { error : {id: 404, description: "This error was caused intentionally."}});
+});
 
 
 http.createServer(app).listen(3000);

@@ -1,0 +1,14 @@
+body > .container {
+    padding: 70px 15px 0;
+  }
+div.err-header {
+  font-size: 350%;
+  font-weight: bolder;
+}
+div.err-description {
+  font-size: 250%;
+}
+a {
+  color: inherit; /* blue colors for links too */
+  /* text-decoration: inherit; no underline */
+}
