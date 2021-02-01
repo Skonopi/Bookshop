@@ -25,7 +25,7 @@ publishers = ['us'];
 app.use(express.static('public'));
 app.get('/', (req, res) => {
     titles = ['hp1', 'hp2', 'hp3']
-    res.render('index.ejs', { books: books, genres: genres, publishers: publishers, keyword: 'keyword' });
+    res.render('index_new.ejs', { books: books, genres: genres, publishers: publishers, keyword: 'keyword' });
 });
 var users = [];
 for(var i = 0; i < 10; i++)

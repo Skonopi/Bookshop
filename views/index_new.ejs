@@ -34,14 +34,22 @@
 
           </div>
         </form>
-        <button class="btn btn-outline-secondary" id="loginBtn">
-          Log in
-          <!-- <i class="bi-alarm" style="font-size: 1rem; color: cornflowerblue;"></i> -->
-        </button>
-        <button class="btn btn-outline-secondary" id="cartBtn">
-          Cart
-          <!-- <i class="bi-alarm" style="font-size: 1rem; color: cornflowerblue;"></i> -->
-        </button>
+        <% if(role===null){%>
+          <a class="btn btn-outline-secondary" href="/login">Log in</a>
+          <%} else {%>
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">Profile</button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="form-control dropdown-item">Placeholder</a></li>
+            </ul>
+            <a class="btn btn-outline-secondary" href="/cart">Cart</a>
+            <%}%>
+              <!-- <button class="btn btn-outline-secondary" id="loginBtn">
+                Log in
+              </button>
+              <button class="btn btn-outline-secondary" id="cartBtn">
+                Cart
+              </button> -->
       </div>
     </nav>
   </header>
@@ -135,9 +143,12 @@
                         <%=books[i].price%> $
                       </p>
                     </div>
-                    <div class="card-footer d-flex align-items-stretch justify-content-center">
-                      <button type="button" name="cartBtn" class="btn btn-dark">Add to cart</button>
-                    </div>
+                    <!-- alternativly maybe if(role !=== 'admin') ? -->
+                    <% if(role==='user' || role===null){%>
+                      <div class="card-footer d-flex align-items-stretch justify-content-center">
+                        <button type="button" name="cartBtn" class="btn btn-dark">Add to cart</button>
+                      </div>
+                      <%}%>
                   </div>
                 </div>
                 <%}%>
