@@ -172,7 +172,7 @@ app.post('/login',async (req,res) => {
                 res.redirect(req.query.returnUrl);
             }
             else{
-                res.render('index_new.ejs');
+                res.redirect('/');
             }
         }
         else{

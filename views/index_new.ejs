@@ -24,24 +24,27 @@
           <div class="input-group align-self-stretch">
             <input class="form-control" type="search" name="searchbar" placeholder="search" value="<%=searchbar%>" />
             <button class="btn btn-outline-secondary" type="submit">Search</button>
-            <!-- <select class="form-select" name="type">
-              <option value="Title">Title</option>
+
+            <select class="form-select" name="searchtype">
+              <option selected value="Title">Title</option>
               <option value="Author">Author</option>
               <option value="Description">Description</option>
-            </select> -->
+            </select>
 
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+            <!-- <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
               aria-expanded="false">Category</button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="form-control dropdown-item">Title</a></li>
               <li><a class="form-control dropdown-item">Author</a></li>
               <li><a class="form-control dropdown-item">Description</a></li>
-            </ul>
+            </ul> -->
 
           </div>
         </form>
         <% if(role===null){%>
-          <a class="btn btn-outline-secondary" href="/login">Log in</a>
+          <button class="btn btn-outline-secondary" id="loginBtn">
+            Log in
+          </button>
           <%} else {%>
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
               aria-expanded="false">Profile</button>
@@ -50,10 +53,7 @@
             </ul>
             <a class="btn btn-outline-secondary" href="/cart">Cart</a>
             <%}%>
-              <!-- <button class="btn btn-outline-secondary" id="loginBtn">
-                Log in
-              </button>
-              <button class="btn btn-outline-secondary" id="cartBtn">
+              <!-- <button class="btn btn-outline-secondary" id="cartBtn">
                 Cart
               </button> -->
       </div>
@@ -220,7 +220,7 @@
     cartBtns.forEach(btn =>
       btn.addEventListener('click', function () {
         //console.log("CART clicked");
-        window.location.href='/cart';
+        window.location.href = '/cart';
         //loginBtn.click();
       }));
   </script>
