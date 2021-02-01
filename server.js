@@ -19,7 +19,7 @@ app.engine('html',ejs.renderFile);
 
 app.get('/', async (req,res) => {
     try {
-        console.log("GET");
+        console.log("GET index");
        /* if (!req.cookies.user){
             res.cookie('usertype','anonim');
             console.log("Added usertype cookie");
@@ -87,7 +87,7 @@ app.get('/', async (req,res) => {
 
 app.post('/', (req,res) => {
     try {
-        console.log("POST");
+        console.log("POST index");
 
         //var searchtype = req.body.type;
         var searchtype = 'title';
@@ -106,7 +106,7 @@ app.post('/', (req,res) => {
 });
 
 app.post('/filter', (req,res) => {
-    console.log("POST");
+    console.log("POST filter");
     var genrefilter = [];
     var array = req.body.genrefilter;
 
@@ -137,9 +137,9 @@ app.post('/filter', (req,res) => {
 
 app.get('/book',async (req,res) => {
     try {
-        console.log("GET");
+        console.log("GET book");
         var bookid = req.query.id;
-        var book = await db.getProductDetails(parseInt(bookid));
+        var book = await db.getProductDetailsDescriptive(parseInt(bookid));
         console.log(book);
         res.render('book.ejs', { 'book':book[0], 'searchbar': '', 'searchtype': 'title'});
     } catch (error) {
@@ -151,6 +151,7 @@ app.get('/book',async (req,res) => {
 });
 
 app.get('/login',(req,res) => {
+    console.log("GET login");
     res.render('login.ejs',{returnUrl:req.query.returnUrl});
 });
 app.post('/login',async (req,res) => {
@@ -160,22 +161,32 @@ app.post('/login',async (req,res) => {
 
     var check = (await db.getPasswordByMail(email))[0];
     console.log(pswd + ' ' + check.password);
-    var result = await bcrypt.compare(pswd,check.password);
-    console.log(req.query.returnUrl);
-    if( result ){
-        res.cookie('user',check.id,{signed:true});
-        if(req.query.returnUrl){
-            console.log("HERE");
-            res.redirect(req.query.returnUrl);
+    if(check){
+        var result = await bcrypt.compare(pswd,check.password);
+        console.log(req.query.returnUrl);
+        if( result ){
+            res.cookie('user',check.id,{signed:true});
+            if(req.query.returnUrl){
+                res.redirect(req.query.returnUrl);
+            }
+            else{
+                res.render('index_new.ejs');
+            }
         }
         else{
-            res.render('index_new.ejs');
+            console.log("Wrong password");
+            res.render('login.ejs',{returnUrl:req.query.returnUrl,error:'Wrong password.'});
         }
     }
     else{
-        console.log("Wrong mail or password");
-        res.render('login.ejs');
+        console.log("No user in db.");
+        res.render('login.ejs',{returnUrl:req.query.returnUrl,error:'Wrong mail.'});
     }
+});
+
+app.get('/cart',authorize('client'),(req,res) => {
+    console.log("HERE");
+    res.render('cart.ejs', { order : {total_cost:0,products:[]} });
 });
 
 //user1 : 'abc'
@@ -190,22 +201,32 @@ async function f(password) {
     var result = await bcrypt.compare( 'abc', '$2b$12$WqnY9kq3nbcoeyLsZ3WpS.N7u8nGG1y4s4eUu6nfSQzhyL7oiBXOi' );
     //console.log(result);
 }
-f('123');
-f('abc123');
+//f('123');
+//f('abc123');
 
 
-function authorize(req,res,next){
-    async (permissions) => {
+function authorize(permissions) {
+    return async (req,res,next) => {
+        console.log('HERE');
+        console.log(req.signedCookies);
         if (req.signedCookies.user) {
-            var userperm = await db.getUserPermissions();
-            permissions.forEach( p => {
-                if( !userperm.includes(p) ){
-                    res.redirect('/login?returnUrl='+req.url);
-                }
-            });
-            next();
+            try{
+                var user = (await db.getUserById(req.signedCookies.user))[0];
+                if( user.role == permissions ){
+                    console.log("Logged ->redirect");
+                    next();
+                }  
+            }
+            catch (error) {
+                console.log("Error while reading database");
+                console.log(error);
+                res.redirect('/login?returnUrl='+req.url);
+            }
         }
-    };
+        else{
+            res.redirect('/login?returnUrl='+req.url);
+        }
+    }
 }
 
 http.createServer(app).listen(3000);

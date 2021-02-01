@@ -58,7 +58,7 @@
                   <label class="list-group-item">
                     <input class="form-check-input me-1" type="checkbox" value="g-<%=genres[i].id%>"
                       id="genreCheck-<%=genres[i].id%>" name="genrefilter" <%=checked%>>
-                    <%=genres[i].name%>
+                    <%=genres[i].genre%>
                   </label>
                   <%}%>
             </ul>
@@ -74,7 +74,7 @@
                   <label class="list-group-item">
                     <input class="form-check-input me-1" type="checkbox" value="g-<%=publishers[i].id%>"
                       id="genreCheck-<%=publishers[i].id%>" name="genrefilter" <%=checked%>>
-                    <%=publishers[i].name%>
+                    <%=publishers[i].publisher%>
                   </label>
                   <%}%>
             </ul>
@@ -129,7 +129,7 @@
                   </p>
                 </div>
                 <div class="card-footer d-flex align-items-stretch justify-content-center">
-                  <button type="button" class="btn btn-dark">Add to cart</button>
+                  <button type="button" name="cartBtn" class="btn btn-dark">Add to cart</button>
                 </div>
               </div>
             </div>
@@ -183,11 +183,21 @@
   </script>
   <script>
     var cartBtn = document.getElementById("cartBtn");
-    var loginBtn = document.getElementById("loginBtn");
     cartBtn.addEventListener('click', function () {
-      console.log("CART");
-      loginBtn.click();
+      //console.log("LOG");
+      window.location.href='/cart';
     });
+  </script>
+  <script>
+    var cartBtns = document.getElementsByName("cartBtn");
+    //var loginBtn = document.getElementById("loginBtn");
+    console.log(cartBtns);
+    cartBtns.forEach( btn =>
+      btn.addEventListener('click', function () {
+        console.log("CART clicked");
+        window.location.href='/cart';
+        //loginBtn.click();
+      }));
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
