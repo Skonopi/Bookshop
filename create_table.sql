@@ -1,7 +1,9 @@
+DROP TABLE IF EXISTS OrdersProducts;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS genres;
 DROP TABLE IF EXISTS publishers;
-DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS roles;
 
 CREATE TABLE genres (
@@ -74,10 +76,43 @@ CREATE TABLE users (
     surname VARCHAR(100), 
     password VARCHAR(100), 
     role_id INT,
+    creation_date DATE,
     FOREIGN KEY (role_id) REFERENCES roles(id));
 
-INSERT INTO users (mail, nickname,  name, surname, password, role_id) values
-    ('sherlock.holmes@gmail.com', 'detective', 'Sherlock', 'Holmes', '$2b$12$WqnY9kq3nbcoeyLsZ3WpS.N7u8nGG1y4s4eUu6nfSQzhyL7oiBXOi', 2),
-    ('john.watson@wp.pl', 'doctor', 'John', 'Watson', '$2b$12$WGhsXNTzLWMaPc0uc0QBQupQ143y1uHbwFT/U1llO7s3A.s1S.9wu', 1),
-    ('mrshudson@o2.pl', 'landlady', 'Martha', 'Hudson', '$2b$12$7NHf8wWk1xTZvqjSTMrDquTnZjkA8u59fFY.IX3rwOC8CakDhBA2W', 1),
-    ('toby@gmail.com', 'woof', 'Toby', 'Sherman', '2b$12$7NHf8wWk1xTZvqjSTMrDquTnZjkA8u59fFY.IX3rwOC8CakDhBA2W', 1);
+INSERT INTO users (mail, nickname,  name, surname, password, role_id, creation_date) values
+    ('sherlock.holmes@gmail.com', 'detective', 'Sherlock', 'Holmes', '$2b$12$WqnY9kq3nbcoeyLsZ3WpS.N7u8nGG1y4s4eUu6nfSQzhyL7oiBXOi', 2, '1.9.2018'),
+    ('john.watson@wp.pl', 'doctor', 'John', 'Watson', '$2b$12$WGhsXNTzLWMaPc0uc0QBQupQ143y1uHbwFT/U1llO7s3A.s1S.9wu', 1, '13.7.2019'),
+    ('mrshudson@o2.pl', 'landlady', 'Martha', 'Hudson', '$2b$12$7NHf8wWk1xTZvqjSTMrDquTnZjkA8u59fFY.IX3rwOC8CakDhBA2W', 1, '26.9.2019'),
+    ('toby@gmail.com', 'woof', 'Toby', 'Sherman', '2b$12$7NHf8wWk1xTZvqjSTMrDquTnZjkA8u59fFY.IX3rwOC8CakDhBA2W', 1, '28.2.2020');
+
+CREATE TABLE orders(
+    id SERIAL PRIMARY KEY,
+    user_id INT,
+    date DATE,
+    address VARCHAR(100),
+    postal_code VARCHAR(30),
+    city VARCHAR(100),
+    finished BOOLEAN,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE);
+
+INSERT INTO orders(user_id, date, address, postal_code, city, finished) values
+    (2, '14.7.2019', 'Baker Street 221B', '675-12', 'London', true),
+    (4, '29.2.2020', 'Archer Street 17', '123-45', 'Derry', false),
+    (2, '7.1.2020', 'Central Park', '675-14', 'London', true),
+    (3, '27.9.2019', 'Main Street', '456-12', 'Spancill Hill', false);
+
+CREATE TABLE OrdersProducts(
+    order_id INT,
+    product_id INT,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE);
+
+INSERT INTO OrdersProducts(order_id, product_id) values
+    (1, 2),
+    (1, 4),
+    (1, 10),
+    (2, 10),
+    (3, 7),
+    (3, 6),
+    (3, 12),
+    (4, 6);

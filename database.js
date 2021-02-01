@@ -3,7 +3,8 @@ module.exports = {
   getProductDetails, getProductDetailsDescriptive, getGenres, getPublishers, 
   insertProduct, deleteProduct, updateProduct,
   getUsers, getPasswordByMail, getUserById,
-  deleteUser, insertUser, updateUser
+  deleteUser, insertUser, updateUser,
+  getOrders, getMatchingOrders
 };
 
 const pg = require('pg');
@@ -11,29 +12,25 @@ const pg = require('pg');
 class ShopRepository {
   constructor(pool) {
     this.pool = pool;
+
+    // Categories of columns used to filter search results.
     this.text_columns = ['title', 'author', 'description'];
-    this.num_columns = ['price', 'publication year'];
-    this.id_columns = ['id', 'genre_id', 'publisher_id', 'mail'];
+    this.num_columns = ['price', 'publication year', 'date'];
+    this.id_columns = ['id', 'genre_id', 'publisher_id', 'mail', 'user_id', 'finished'];
+
+    // Lists of columns in tables.
     this.users_columns = ['mail', 'nickname', 'name', 'surname', 'password'];
     this.products_columns = [
       'title', 'author', 'price', 'genre_id', 'publisher_id', 
       'publication_year', 'binding', 'description' ,'image_path']
   }
 
-  constructSelectQuery(table, columns, conditions, limit, offset) {
-    // Variables table and columns are visible only to internal functions, 
-    // so there is no danger of SQL Injection. 
-    var sql;
-    if (columns) {
-      sql = `select t.${columns.join(',')} from ${table} t`; 
-    }
-    else {
-      sql = `select * from ${table} t`;
-    }
-
+  constructFromClause(table, columns, sql) {
+    // Some select queries need to be joined with other tables,    
     if (table == 'users' && columns && columns.includes('role')) {
       sql += ' join roles r on role_id = r.id ';
     }
+
     if (table == 'products' && columns && columns.includes('genre')) {
       sql += ' join genres g on genre_id = g.id ';
     }
@@ -41,10 +38,17 @@ class ShopRepository {
       sql += ' join publishers p on publisher_id = p.id ';
     }
 
+    if (table == 'orders') {
+      sql += ` join OrdersProducts op on t.id = op.order_id `;
+    }
+
+    return sql;
+  }
+
+  constructWhereClause(conditions, sql) {
     // Construct 'where' clause and the array of parameters.
-    var clauses = [];
-    var values = [];
-    var n = 1;
+
+    var clauses = [], values = [], n = 1;
     for (var property in conditions) {
       // For each property in conditions, construct a proper constraint.
       var constraints = [];
@@ -59,11 +63,22 @@ class ShopRepository {
       }
       else if (this.num_columns.includes(property)){
         for (var value of conditions[property]) {
-          constraints.push(` t.${property} >= $${n} and ${property} <= $${n+1} `);
-          n += 2;
+          var cond = ''
+          if (value[0]){
+            cond += ` t.${property} >= $${n} `;
+            n++;
+            values.push(value[0]);
+          }
 
-          values.push(value[0]);
-          values.push(value[1]);
+          if (value[1]) {
+            if (value[0])
+              cond += 'and'
+            cond+=` t.${property} <= $${n} `;
+            n++;
+            values.push(value[1]);
+          }
+
+          constraints.push(cond);
         }
       }
       else if (this.id_columns.includes(property)) {
@@ -84,6 +99,24 @@ class ShopRepository {
     if (clauses.length > 0)
       sql += ` where ${clauses.join('and')}`
 
+    return [sql, values];
+  }
+
+  constructSelectQuery(table, columns, conditions, limit, offset) {
+    // Variables table and columns are visible only to internal functions, 
+    // so there is no danger of SQL Injection. 
+
+    var sql, values;
+    if (columns) {
+      sql = `select t.${columns.join(',')} from ${table} t`; 
+    }
+    else {
+      sql = `select * from ${table} t`;
+    }
+
+    sql = this.constructFromClause(table, columns, sql);
+    [sql, values] = this.constructWhereClause(conditions, sql);
+
     // Check if there are valid limit and offset parameters.
     if (typeof limit == 'number' && typeof offset == 'number') {
       sql += ` limit ${limit} offset ${offset}`;
@@ -100,6 +133,21 @@ class ShopRepository {
       return result.rows;
     }
     catch (err) {
+      throw "Database error.";
+    }
+  }
+
+  handleError(err) {
+    if (err.constraint == 'users_mail_key') {
+      throw "Mail already exists.";
+    }
+    else if (err.constraint == 'users_nickname_key') {
+      throw "Nickname already exists.";
+    }
+    else if (err == "Role does not exist.") {
+      throw "Role does not exist.";
+    }
+    else {
       throw "Database error.";
     }
   }
@@ -141,6 +189,44 @@ class ShopRepository {
     }
     catch (err) {
       throw "Database error."
+    }
+  }
+
+  async insertUser(mail, nickname, name, surname, password, role) {
+    try {
+      // Get id of the requested role.
+      var sql = 'select id from roles where upper(role) = upper($1)';
+      var res = await this.pool.query(sql, [role]);
+      if (res.rows.length == 0) {
+        throw "Role does not exist.";
+      }
+
+      var role_id = res.rows[0].id;
+      sql = `insert into users(
+        mail, nickname, name, surname, password, role_id, creation_date) 
+      values ($1, $2, $3, $4, $5, $6, current_date)`;
+      var values = [mail, nickname, name, surname, password, role_id];
+
+      await this.pool.query(sql, values);
+    }
+    catch (err) {
+      this.handleError(err);
+    }
+  }
+
+  async insertOrder(user_id, finished, product_ids) {
+    try {
+      var sql = 'insert into orders(user_id, date, finished) values ($1, current_date, $2) returning id';
+      var res = await this.pool.query(sql, [user_id, finished]);
+      console.log(res.rows[0].id);
+      for (var product_id of product_ids) {
+        sql = 'insert into OrdersProducts(order_id, product_id) values ($1, $2)';
+        await this.pool.query(sql, [res.rows[0].id, product_id]);
+      }
+    }
+    catch (err) {
+      console.log(err);
+      throw "Database error";
     }
   }
 
@@ -189,21 +275,6 @@ class ShopRepository {
     return [sql, values];
   }
 
-  handleUserError(err) {
-    if (err.constraint == 'users_mail_key') {
-      throw "Mail already exists.";
-    }
-    else if (err.constraint == 'users_nickname_key') {
-      throw "Nickname already exists.";
-    }
-    else if (err == "Role does not exist.") {
-      throw "Role does not exist.";
-    }
-    else {
-      throw "Database error.";
-    }
-  }
-
   async update(table, id, updates) {
     try {
       var columns = [];
@@ -216,28 +287,7 @@ class ShopRepository {
       await this.pool.query(sql, values);
     }
     catch (err) {
-      this.handleUserError(err);
-    }
-  }
-
-  async insertUser(mail, nickname, name, surname, password, role) {
-    try {
-      var sql = 'select id from roles where upper(role) = upper($1)';
-      var res = await this.pool.query(sql, [role]);
-      if (res.rows.length == 0) {
-        throw "Role does not exist.";
-      }
-
-      var role_id = res.rows[0].id;
-      sql = `insert into users(
-        mail, nickname, name, surname, password, role_id) 
-      values ($1, $2, $3, $4, $5, $6)`;
-      var values = [mail, nickname, name, surname, password, role_id];
-
-      await this.pool.query(sql, values);
-    }
-    catch (err) {
-      this.handleUserError(err);
+      this.handleError(err);
     }
   }
 
@@ -280,10 +330,11 @@ async function getSomeProducts(limit, offset) {
 }
 
 /**
- * Get products where that match given conditions. Fetch limit rows at offset.
+ * Get products that match given conditions. Fetch limit rows at offset.
  * Conditions is a dictionary of form property: list of possible values.
  * For text properties values are strings.
  * For numeric properties values are lists [min_value, max_value].
+ * If min_value is null, it is treated as -inf. Similarly max_value.
  * For id properties values are ids.
  * Valid text properties: title, author, description.
  * Valid numeric properties: price, publication_year.
@@ -373,7 +424,7 @@ async function updateProduct(id, updates) {
  * Get all users.
  */
 async function getUsers() {
-  var res = await repo.retrieve('users', ['id', 'mail', 'nickname', 'name', 'surname', 'role_id']);
+  var res = await repo.retrieve('users', ['id', 'mail', 'nickname', 'name', 'surname', 'role_id', 'creation_date']);
   return res;
 }
 
@@ -391,7 +442,7 @@ async function getPasswordByMail(mail) {
  * @param {number} id 
  */
 async function getUserById(id) {
-  var res = await repo.retrieve('users', ['id', 'mail', 'nickname', 'name', 'surname', 'role'], {'id' : [id]});
+  var res = await repo.retrieve('users', ['id', 'mail', 'nickname', 'name', 'surname', 'role', 'creation_date'], {'id' : [id]});
   return res;
 }
 
@@ -425,4 +476,48 @@ async function insertUser(mail, nickname, name, surname, password, role) {
  */
 async function updateUser(id, updates) {
   await repo.update('users', id, updates);
+}
+
+function groupProducts(result) {
+  var grouped = {};
+  for (var row of result) {
+    if (!grouped[row.id]) {
+      grouped[row.id] = {'info' : row, 'product_list' : []};
+    }
+    grouped[row.id]['product_list'].push(row.product_id);
+  }
+
+  var res = [];
+  for (var id of Object.keys(grouped)) {
+    var row = grouped[id]['info'];
+    delete row['product_id'];
+    row['product_list'] = grouped[id]['product_list'];
+    res.push(row);
+  }
+  return res;
+}
+
+/**
+ * Get all orders.
+ */
+async function getOrders() {
+  var res = await repo.retrieve('orders', ['id', 'user_id', 'date', 'address', 'postal_code', 'city', 'finished', 'product_id']);
+  return groupProducts(res);
+}
+
+/**
+ * Get orders that match given conditions.
+ * Conditions is a dictionary of form property: list of possible values.
+ * For boolean properties values are either true or false.
+ * For numeric properties values are lists [min_value, max_value].
+ * If min_value is null, it is treated as -inf. Similarly max_value.
+ * For id properties values are ids.
+ * Valid boolean properties: finished.
+ * Valid numeric properties: date.
+ * Valid id properties: id, user_id.
+ * @param {object} conditions
+ */
+async function getMatchingOrders(conditions) {
+  var res = await repo.retrieve('orders', ['id', 'user_id', 'date', 'address', 'postal_code', 'city', 'finished', 'product_id'], conditions);
+  return groupProducts(res);
 }
