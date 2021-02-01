@@ -7,15 +7,15 @@ var app = express();
 var books = [];
 for (var i = 0; i < 17; i++) {
     book = {
-        title: "Harry Potter " + (i + 1),
-        author: "J. K. Rowling",
+        id: i,
+        title: "Title " + i,
+        author: "Author" + i,
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        price: (i + 1) * 10.0,
-        path: "images/book1.jpeg",
-        publisher: "some publisher",
-        publication_year: "1987",
-        genre: "Fantasy",
-        id: i
+        price: i * 10.0,
+        path: "cover" + (i % 2 + 1) + ".jpg",
+        publisher: "publisher" + (i%7),
+        publication_year: 1987 + i,
+        genre: "Fantasy"
     };
     books[i] = book;
 }
@@ -72,6 +72,12 @@ app.get('/admin', (req, res) => {
 });
 app.get('/error', (req, res) => {
     res.render('error.ejs', { error : {id: 404, description: "This error was caused intentionally."}});
+});
+app.get('/products', (req, res) => {
+    res.render('products.ejs', { products: products});
+});
+app.get('/products/new', (req, res) => {
+    res.render('new_product.ejs', { products: products});
 });
 
 

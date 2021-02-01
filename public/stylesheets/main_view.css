@@ -10,3 +10,6 @@ body > .container {
 .pagination {
     padding-top: 20px;
 }
+div.message{
+  font-size: x-large;
+}
