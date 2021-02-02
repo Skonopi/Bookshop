@@ -222,33 +222,36 @@ app.post('/login',async (req,res) => {
     console.log('POST login');
     if(req.body.registerBtn){
         console.log("Register");
-        var password = await bcrypt.hash(req.body.passwordRegister, 12 );
+        //var password = await bcrypt.hash(req.body.passwordRegister, 12 );
         var u = {
             mail:req.body.emailRegister,
             nickname:req.body.nicknameRegister,
             name:req.body.nameRegister,
             surname:req.body.surnameRegister,
-            password:password,
+            password:req.body.passwordRegister,
             role:'client'
         };
+        var udb = Object.assign({},u);
+        udb.password = await bcrypt.hash(u.password, 12 );
         try{
-            await db.insertUser(u);
+            await db.insertUser(udb);
             res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Register completed. You can now log in.',register:emptyregister});
         }
         catch(error){
-            console.log("Some error");
+            console.log(error);
             switch( error ){
                 case 'Mail already exists.':
-                    console.log("Szach mat zły mail.");
+                    //console.log("Szach mat zły mail.");
+                    res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Email already exists.',register:u});
                     break;
                 case 'Nickname already exists.':
-                    console.log("Wymyśl cos orginalnego");
+                    res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Nickname already exists.',register:u});
                     break;
                 default:
-                    console.log(error);
+                    res.render('login.ejs',{returnUrl:req.query.returnUrl,register:u});
+                    //res.render('error.js',{})
                     break;
             }
-            res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Nickname already exists.',register:u});
         }
         //res.redirect('/login?returnUrl='+req.url);
     }
@@ -277,7 +280,7 @@ app.post('/login',async (req,res) => {
         }
         else{
             console.log("No user in db.");
-            res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong mail.'});
+            res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong mail.',register:emptyregister});
         }
     }
 });
