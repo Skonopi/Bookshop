@@ -59,6 +59,7 @@ var order = {
 
 var order_db = {
     id : 1234,
+    user_id : 18,
     date : '2020-01-01',
     address : 'addressy street 5',
     postal_code : '123-45',
@@ -66,6 +67,11 @@ var order_db = {
     finished : true,
     products : products,
 };
+var orders = [];
+for(var i = 0; i < 20; i++)
+{
+    orders[i] = order_db;
+}
 app.get('/users', (req, res) => {
     res.render('users.ejs', { users : users });
 });
@@ -89,6 +95,9 @@ app.get('/products', (req, res) => {
 });
 app.get('/order', (req, res) => {
     res.render('order.ejs', { order : order_db});
+});
+app.get('/orders', (req, res) => {
+    res.render('orders.ejs', { orders : orders});
 });
 app.get('/book_admin', (req, res) => {
     res.render('book_admin.ejs', { book: books[0], genres: ['1', '2', '3', '4'], publishers: ['a', 'b', 'c', 'd']}); // or book : null for adding new book

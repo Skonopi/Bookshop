@@ -1,0 +1,29 @@
+<!-- table of orders -->
+
+<table class="table table-striped align-middle text-center table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Order ID</th>
+            <th scope="col">User ID</th>
+            <th scope="col">Date</th>
+            <th scope="col">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% for(var i=0; i < orders.length; i++){%>
+            <tr>
+                <th scope="row">
+                    <%=orders[i].id%>
+                </th>
+                <td>
+                    <%=orders[i].user_id%>
+                </td>
+                <td>
+                    <%=orders[i].date%>
+                <td>
+                    <%if(orders[i].finished){%> Completed <%}else{%> In progress <%}%>
+                </td>
+            </tr>
+            <%}%>
+    </tbody>
+</table>
