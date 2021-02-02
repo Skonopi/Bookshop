@@ -4,7 +4,7 @@ module.exports = {
   insertProduct, deleteProduct, updateProduct,
   getUsers, getPasswordByMail, getUserById,
   deleteUser, insertUser, updateUser,
-  getOrders, getMatchingOrders
+  getOrders, getMatchingOrders, insertOrder
 };
 
 const pg = require('pg');
@@ -217,18 +217,19 @@ class ShopRepository {
     }
   }
 
-  async insertOrder(user_id, finished, product_ids) {
+  async insertOrder(order) {
     try {
-      var sql = 'insert into orders(user_id, date, finished) values ($1, current_date, $2) returning id';
-      var res = await this.pool.query(sql, [user_id, finished]);
-      console.log(res.rows[0].id);
-      for (var product_id of product_ids) {
+      var sql = `insert into orders(user_id, date, address, postal_code, city, finished) 
+      values ($1, current_date, $2, $3, $4, $5) returning id`;
+      var res = await this.pool.query(sql, 
+        [order['user_id'], order['address'], order['postal_code'], order['city'], order['finished']]);
+      
+      for (var product_id of order['product_list']) {
         sql = 'insert into OrdersProducts(order_id, product_id) values ($1, $2)';
         await this.pool.query(sql, [res.rows[0].id, product_id]);
       }
     }
     catch (err) {
-      console.log(err);
       throw "Database error";
     }
   }
@@ -515,4 +516,14 @@ async function getOrders() {
 async function getMatchingOrders(conditions) {
   var res = await repo.retrieve('orders', ['id', 'user_id', 'date', 'address', 'postal_code', 'city', 'finished', 'product_id'], conditions);
   return groupProducts(res);
+}
+
+/**
+ * Insert order with given values.
+ * values is a dictionary with pairs key:value.
+ * Keys are user_id, address, postal_code, city, finished 
+ * Finished can be true or false.
+ */
+async function insertOrder(values) {
+  await repo.insertOrder(values);
 }
