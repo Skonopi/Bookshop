@@ -41,7 +41,7 @@
       </div>
       <div class="col ps-4 border-start border-dark">
         <h5 class="mb-3">First time here? Create a new account!</h5>
-        <form method="POST" action="\register" class="needs-validation"  novalidate >
+        <form method="POST" action="\login?returnUrl=<%=returnUrl%>" class="needs-validation"  novalidate >
           <div class="form-floating border-right mb-3">
             <input type="text" class="form-control" id="inputNicknameRegister" name="nicknameRegister" required
               placeholder="Nickname" />
@@ -90,7 +90,7 @@
               Please confirm your password.
             </div>
           </div> -->
-          <button class="btn btn-dark" type="submit">Register</button>
+          <button class="btn btn-dark" name="registerBtn" value='register' type="submit">Register</button>
         </form>
       </div>
     </div>
