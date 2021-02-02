@@ -54,7 +54,7 @@ app.get('/', async (req,res) => {
         var query_properties = ['title','author','description'];
         var match = {};
 
-        var searchtype=req.query.searchtype;
+        var searchtype=req.query.type;
         if(!searchtype){
             searchtype='title';
         }
@@ -135,6 +135,7 @@ app.post('/', (req,res) => {
         console.log("POST index");
 
         var searchtype = req.body.searchtype;
+        console.log(req.body.searchtype);
         //var searchtype = 'title';
         var searchbar = req.body.searchbar;
 
