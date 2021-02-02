@@ -277,7 +277,7 @@ app.get('/cart',authorize('client'), async (req,res) => {
                     prize: book.prize
                 }
             });
-            total_cost += book.prize;
+            total_cost += book.prize*parseInt(p);
         };
     }
     cart.total_cost = total_cost;
