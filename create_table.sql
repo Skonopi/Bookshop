@@ -46,21 +46,21 @@ CREATE TABLE products (
     FOREIGN KEY (genre_id) REFERENCES genres(id),
     FOREIGN KEY (publisher_id) REFERENCES publishers(id));
 
-INSERT INTO products(title, author, price, genre_id, publisher_id, image_path) values
-    ('Dziady', 'Adam Mickiewicz', 40, 1, 2, './images/book1.jpeg'),
-    ('Autostopem przez galaktykę', 'Douglas Adams', 42, 3, 4, './images/book2.jpeg'),
-    ('Kolor magii', 'Terry Pratchett', 150, 2, 5, './images/book3.jpeg'),
-    ('Władca pierścieni', 'Tolkien', 35.50, 2, 3, NULL),
-    ('Przygody Sherlocka Holemesa', 'Sir Arthur Conan Doyle', 70, 6, 1, './images/book1.jpeg'),
-    ('Księga przypadków Sherlocka Holmesa', 'Sir Arthur Conan Doyle', 69.99, 6, 1, './images/book2.jpeg'),
-    ('Marsjanin', 'Andy Weir', 42.39, 2, 3, './images/book3.jpeg'),
-    ('Kosmiczny poradnik życia na Ziemi', 'Chris Hadfield', 28, 4, 3, NULL),
-    ('Ostatni oddech Cezara', 'Sam Kean', 39.99, 5, 3, './images/book1.jpeg'),
-    ('Dziwne przypadki ludzkiego mózgu', 'Sam Kean', 39.99, 5, 3, './images/book2.jpeg'),
-    ('Felix, Net i Nika', 'Rafał Kosik', 33.33, 3, 4, './images/book3.jpeg'),
-    ('Pan raczy żartować, panie Feynman', 'Richard Feynman', 47, 4, 4, './images/book1.jpeg'),
-    ('Morderstwo w Orient Expressie', 'Agatha Christie', 18.50, 6, 5, './images/book2.jpeg'),
-    ('Morderstwo odbędzie się', 'Agatha Christie', 21, 6, 5, './images/book3.jpeg');
+INSERT INTO products(title, author, price, genre_id, publisher_id, publication_year, image_path) values
+    ('Dziady', 'Adam Mickiewicz', 40, 1, 2, 1970, './images/book1.jpeg'),
+    ('Autostopem przez galaktykę', 'Douglas Adams', 42, 3, 4, 1966, './images/book2.jpeg'),
+    ('Kolor magii', 'Terry Pratchett', 150, 2, 5, 1989, './images/book3.jpeg'),
+    ('Władca pierścieni', 'Tolkien', 35.50, 2, 3, 1950, NULL),
+    ('Przygody Sherlocka Holmesa', 'Sir Arthur Conan Doyle', 70, 6, 1, 1890, './images/book1.jpeg'),
+    ('Księga przypadków Sherlocka Holmesa', 'Sir Arthur Conan Doyle', 69.99, 6, 1, 1895, './images/book2.jpeg'),
+    ('Marsjanin', 'Andy Weir', 42.39, 2, 3, 2010, './images/book3.jpeg'),
+    ('Kosmiczny poradnik życia na Ziemi', 'Chris Hadfield', 28, 4, 3, 2015, NULL),
+    ('Ostatni oddech Cezara', 'Sam Kean', 39.99, 5, 3, 2012, './images/book1.jpeg'),
+    ('Dziwne przypadki ludzkiego mózgu', 'Sam Kean', 39.99, 5, 3, 2015, './images/book2.jpeg'),
+    ('Felix, Net i Nika', 'Rafał Kosik', 33.33, 3, 4, 2008, './images/book3.jpeg'),
+    ('Pan raczy żartować, panie Feynman', 'Richard Feynman', 47, 4, 4, 1971, './images/book1.jpeg'),
+    ('Morderstwo w Orient Expressie', 'Agatha Christie', 18.50, 6, 5, 1920, './images/book2.jpeg'),
+    ('Morderstwo odbędzie się', 'Agatha Christie', 21, 6, 5, 1925, './images/book3.jpeg');
 
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,

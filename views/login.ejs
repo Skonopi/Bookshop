@@ -13,17 +13,17 @@
   <title>Hello, world!</title>
 </head>
 
-<body class="text-center h-100">
+<body class="text-center h-100" onload='handleError("<%=locals.message%>")'>
   <div class="container h-100">
     <div class="row h-100 align-items-center">
       <div class="col pe-4 justify-content-end">
         <h5 class="mb-3">Already have an account? Log in!</h5>
-        <form method="POST" action="\login?returnUrl=<%=returnUrl%>" class="needs-validation" novalidate>
+        <form method="POST" action="\login?returnUrl=<%=returnUrl%>" class="needs-validation" id="loginForm" novalidate>
           <div class="form-floating mb-3">
             <input type="email" class="form-control" id="inputEmailLogin" name="email" required
               placeholder="Email address">
             <label for="inputEmailLogin">Email address</label>
-            <div class="invalid-feedback">
+            <div class="invalid-feedback" id="loginEmailInvalid">
               Valid email required.
             </div>
           </div>
@@ -31,7 +31,7 @@
             <input type="password" class="form-control" id="inputPasswordLogin" name="password" required
               placeholder="Password">
             <label for="inputPasswordLogin">Password</label>
-            <div class="invalid-feedback">
+            <div class="invalid-feedback" id="loginPasswordInvalid">
               Password required.
             </div>
           </div>
@@ -41,45 +41,46 @@
       </div>
       <div class="col ps-4 border-start border-dark">
         <h5 class="mb-3">First time here? Create a new account!</h5>
-        <form method="POST" action="\login?returnUrl=<%=returnUrl%>" class="needs-validation"  novalidate >
+        <form method="POST" action="\login?returnUrl=<%=returnUrl%>" class="needs-validation" id="registerForm"
+          novalidate>
           <div class="form-floating border-right mb-3">
-            <input type="text" class="form-control" id="inputNicknameRegister" name="nicknameRegister" required
+            <input type="text" class="form-control" id="inputNicknameRegister" name="nicknameRegister" value = "<%=register.nickname%>" required
               placeholder="Nickname" />
-              <div class="invalid-feedback">
-                Nickname required.
-              </div>
+            <div class="invalid-feedback" id="registerNicknameInvalid">
+              Nickname required.
+            </div>
             <label for="inputNicknameRegister">Nickname</label>
           </div>
           <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="inputNameRegister" name="nameRegister" placeholder="Name"
+            <input type="text" class="form-control" id="inputNameRegister" name="nameRegister" value = "<%=register.name%>" placeholder="Name"
               required />
-              <div class="invalid-feedback">
-                Name required.
-              </div>
+            <div class="invalid-feedback">
+              Name required.
+            </div>
             <label for="inputNameRegister">Name</label>
           </div>
           <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="inputSurnameRegister" name="surnameRegister" required
+            <input type="text" class="form-control" id="inputSurnameRegister" name="surnameRegister" value = "<%=register.surname%>" required
               placeholder="Surname" />
-              <div class="invalid-feedback">
-                Surname required.
-              </div>
+            <div class="invalid-feedback">
+              Surname required.
+            </div>
             <label for="inputSurnameRegister">Surname</label>
           </div>
           <div class="form-floating mb-3">
-            <input type="email" class="form-control" id="inputEmailRegister" name="emailRegister" required
+            <input type="email" class="form-control" id="inputEmailRegister" name="emailRegister" value = "<%=register.email%>" required
               placeholder="Email address" />
-              <div class="invalid-feedback">
-                Valid email required.
-              </div>
+            <div class="invalid-feedback">
+              Valid email required.
+            </div>
             <label for="inputEmailRegister">Email address</label>
           </div>
           <div class="form-floating mb-3">
-            <input type="password" class="form-control" id="inputPasswordRegister" name="passwordRegister" required
+            <input type="password" class="form-control" id="inputPasswordRegister" name="passwordRegister" value = "<%=register.password%>" required
               placeholder="Password" />
-              <div class="invalid-feedback">
-                Password required.
-              </div>
+            <div class="invalid-feedback">
+              Password required.
+            </div>
             <label for="inputPasswordRegister">Password</label>
           </div>
           <!-- <div class="form-floating mb-3">
@@ -97,6 +98,29 @@
 
   </div>
 
+  <script>
+    function handleError(message) {
+      var loginForm = document.getElementById("loginForm");
+      var registerForm = document.getElementById("registerForm");
+      console.log(message);
+      if (message == "Wrong password.") {
+        document.getElementById("loginPasswordInvalid").innerText = message;
+        loginForm.classList.add("was-validated");
+        console.log('login error password');
+
+      } else if (message == "Wrong mail.") {
+        document.getElementById("loginEmailInvalid").innerText = message;
+        loginForm.classList.add("was-validated");
+        console.log('login error email');
+
+
+      } else if (message == "Nickname already exists.") {
+        document.getElementById("registerNicknameInvalid").innerText = message;
+        registerForm.classList.add("was-validated");
+        console.log('register error nickname');
+      }
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
     crossorigin="anonymous"></script>

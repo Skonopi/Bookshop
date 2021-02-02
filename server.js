@@ -256,7 +256,7 @@ app.post('/login',async (req,res) => {
         var pswd = req.body.password;
 
         var check = (await db.getPasswordByMail(email))[0];
-        console.log(pswd + ' ' + check.password);
+        // console.log(pswd + ' ' + check.password);
         if(check){
             var result = await bcrypt.compare(pswd,check.password);
             if( result ){
