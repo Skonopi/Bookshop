@@ -1,23 +1,46 @@
 const http = require('http');
 const express = require('express');
+const session = require('express-session');
 const ejs = require('ejs');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
+const multer = require('multer');
 
 const  db = require('./database');
 
-var app = express()
+var app = express();
+var upload = multer();
 
 app.set('views','./views');
 app.set('view engine','html');
 
+app.disable('etag');
+
 app.use(cookieParser('hje5q46qzdc5712323564gfdght6y6'));
 app.use(express.urlencoded({extended:true}));
 app.use(express.static('public'));
+app.use(session({resave:true, saveUninitialized:true, secret:'qvfgsdfgtshgnhmesatuk'}));
 
 app.engine('html',ejs.renderFile);
 
 var emptyregister =  {'email':'','nickname':'','name':'','surname':'','password':''};
+
+/*app.post('/productAdded',upload.single(),(req,res) => {
+    var newProduct = req.body.newProduct;
+    if(newProduct){
+        var cart = {};
+        console.log(req.session.cart);
+        if (req.session.cart){
+            cart = JSON.parse(req.session.cart);
+        }
+        if (!cart[newProduct]) {
+            cart[newProduct] = 0;
+        }
+        cart[newProduct] += 1;
+        console.log(cart);
+        req.session.cart = JSON.stringify(cart);
+    }
+});*/
 
 app.get('/', async (req,res) => {
     try {
@@ -82,7 +105,7 @@ app.get('/', async (req,res) => {
             'publishers':publishers,
             'checkedGenres':genrefilter,
             'checkedPublishers':publisherfilter,
-        'role':role};
+            'role':role};
         res.render('index_new.ejs',references);
 
         
@@ -176,12 +199,13 @@ app.post('/login',async (req,res) => {
     console.log('POST login');
     if(req.body.registerBtn){
         console.log("Register");
+        var password = await bcrypt.hash(req.body.passwordRegister, 12 );
         var u = {
             mail:req.body.emailRegister,
             nickname:req.body.nicknameRegister,
             name:req.body.nameRegister,
             surname:req.body.surnameRegister,
-            password:req.body.passwordRegister,
+            password:password,
             role:'client'
         };
         try{
@@ -235,8 +259,30 @@ app.post('/login',async (req,res) => {
     }
 });
 
-app.get('/cart',authorize('client'),(req,res) => {
-    res.render('cart.ejs', { order : {total_cost:0,products:[]} });
+app.get('/cart',authorize('client'), async (req,res) => {
+    var cart = {};
+    var products = [];
+    var total_cost = 0;
+    if(req.session.cart){
+        var productsid = JSON.parse(req.session.cart);
+        for ( const p of Object.keys(productsid)) {
+            console.log(p);
+            var book = await db.getProductDetailsDescriptive(parseInt(p));
+            products.push({
+                quantity : productsid[p],
+                book : {
+                    id : book.id,
+                    title : book.title,
+                    author: book.author,
+                    prize: book.prize
+                }
+            });
+            total_cost += book.prize*parseInt(p);
+        };
+    }
+    cart.total_cost = total_cost;
+    cart.products = products;
+    res.render('cart.ejs', { order : cart });
 });
 
 app.post('/register',async (req,res) =>{
@@ -317,6 +363,23 @@ function authorize(permissions) {
         }
     }
 }
+
+app.post('/tocart',(req,res) => {
+    var newProduct = req.body.cartBtn;
+    if(newProduct){
+        var cart = {};
+        if (req.session.cart){
+            cart = JSON.parse(req.session.cart);
+        }
+        if (!cart[newProduct]) {
+            cart[newProduct] = 0;
+        }
+        cart[newProduct] += 1;
+        console.log(cart);
+        req.session.cart = JSON.stringify(cart);
+    }
+    res.redirect(`/?type=${req.query.searchtype}&searchbar=${req.query.searchbar}`);
+});
 
 http.createServer(app).listen(3000);
 console.log("Server is listening.");

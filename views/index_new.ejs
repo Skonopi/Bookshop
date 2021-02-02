@@ -150,10 +150,12 @@
                     </div>
                     
                     <%if(role != 'admin'){%>
-                      <div class="card-footer d-flex align-items-stretch justify-content-center">
-                        <button type="button" name="cartBtn" value="<%=books[i].id%>" class="btn btn-dark">Add to cart</button>
-                      </div>
-                      <%}%>
+                      <form method="post" action="\tocart?type=<%=searchtype%>&searchbar=<%=searchbar%>">
+                        <div class="card-footer d-flex align-items-stretch justify-content-center">
+                          <button type="submit" name="cartBtn" value="<%=books[i].id%>" class="btn btn-dark">Add to cart</button>
+                        </div>
+                        <%}%>
+                      </form>
                   </div>
                 </div>
                 <%}%>
@@ -221,7 +223,14 @@
     cartBtns.forEach(btn =>
       btn.addEventListener('click', function () {
         var cart = localStorage.getItem('cart');
-        var id = btn.value;
+        /*var id = btn.value;
+
+        var req = new XMLHttpRequest();
+        req.open('post','/productAdded',true);
+
+        var form = new FormData();
+        form.append('newProduct',id);
+        req.send(form);
         if (!cart){
           cart = {};
         }
@@ -233,7 +242,7 @@
         }
         cart[id] += 1;
         console.log(cart);
-        localStorage.setItem('cart', JSON.stringify(cart));
+        localStorage.setItem('cart', JSON.stringify(cart));*/
       }));
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
