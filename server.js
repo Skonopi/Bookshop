@@ -174,31 +174,64 @@ app.get('/login',(req,res) => {
 });
 app.post('/login',async (req,res) => {
     console.log('POST login');
-    var email = req.body.email;
-    var pswd = req.body.password;
+    if(req.body.registerBtn){
+        console.log("Register");
+        var u = {
+            mail:req.body.emailRegister,
+            nickname:req.body.nicknameRegister,
+            name:req.body.nameRegister,
+            surname:req.body.surnameRegister,
+            password:req.body.passwordRegister,
+            role:'client'
+        };
+        try{
+            await db.insertUser(u);
+            res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Register completed. You can now log in.',register:emptyregister});
+        }
+        catch(error){
+            console.log("Some error");
+            switch( error ){
+                case 'Mail already exists.':
+                    console.log("Szach mat zły mail.");
+                    break;
+                case 'Nickname already exists.':
+                    console.log("Wymyśl cos orginalnego");
+                    break;
+                default:
+                    console.log(error);
+                    break;
+            }
+            res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Nickname already exists.',register:u});
+        }
+        //res.redirect('/login?returnUrl='+req.url);
+    }
+    else{
+        var email = req.body.email;
+        var pswd = req.body.password;
 
-    var check = (await db.getPasswordByMail(email))[0];
-    console.log(pswd + ' ' + check.password);
-    if(check){
-        var result = await bcrypt.compare(pswd,check.password);
-        if( result ){
-            res.cookie('user',check.id,{signed:true});
-            res.cookie('role',check.role,{signed:true});
-            if(req.query.returnUrl){
-                res.redirect(req.query.returnUrl);
+        var check = (await db.getPasswordByMail(email))[0];
+        console.log(pswd + ' ' + check.password);
+        if(check){
+            var result = await bcrypt.compare(pswd,check.password);
+            if( result ){
+                res.cookie('user',check.id,{signed:true});
+                res.cookie('role',check.role,{signed:true});
+                if(req.query.returnUrl){
+                    res.redirect(req.query.returnUrl);
+                }
+                else{
+                    res.redirect('/');
+                }
             }
             else{
-                res.redirect('/');
+                console.log("Wrong password");
+                res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong password.',register:emptyregister});
             }
         }
         else{
-            console.log("Wrong password");
-            res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong password.',register:emptyregister});
+            console.log("No user in db.");
+            res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong mail.'});
         }
-    }
-    else{
-        console.log("No user in db.");
-        res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong mail.'});
     }
 });
 
@@ -208,7 +241,7 @@ app.get('/cart',authorize('client'),(req,res) => {
 
 app.post('/register',async (req,res) =>{
     var u = {
-        email:req.body.emailRegister,
+        mail:req.body.emailRegister,
         nickname:req.body.nicknameRegister,
         name:req.body.nameRegister,
         surname:req.body.surnameRegister,
@@ -216,8 +249,7 @@ app.post('/register',async (req,res) =>{
         role:'client'
     };
     try{
-        console.log("Trying register");
-        await db.insertUser(u.email,u.nickname,u.name,u.surname,u.password);
+        await db.insertUser(u);
         res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Register completed. You can now log in.',register:emptyregister});
     }
     catch(error){
