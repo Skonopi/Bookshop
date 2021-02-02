@@ -22,10 +22,18 @@ var emptyregister =  {'email':'','nickname':'','name':'','surname':'','password'
 app.get('/', async (req,res) => {
     try {
         console.log("GET index");
+<<<<<<< HEAD
        /* if (!req.cookies.user){
             res.cookie('usertype','anonim');
             console.log("Added usertype cookie");
         }*/
+=======
+
+        var role = null;
+        if (req.signedCookies.role){
+            role = req.signedCookies.role;
+        }
+>>>>>>> Server-save
 
         var query_properties = ['title','author','description'];
         var match = {};
