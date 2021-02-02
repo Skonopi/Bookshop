@@ -106,15 +106,16 @@ INSERT INTO orders(user_id, date, address, postal_code, city, finished) values
 CREATE TABLE OrdersProducts(
     order_id INT,
     product_id INT,
+    number INT,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE);
 
-INSERT INTO OrdersProducts(order_id, product_id) values
-    (1, 2),
-    (1, 4),
-    (1, 10),
-    (2, 10),
-    (3, 7),
-    (3, 6),
-    (3, 12),
-    (4, 6);
+INSERT INTO OrdersProducts(order_id, product_id, number) values
+    (1, 2, 1),
+    (1, 4, 2),
+    (1, 10, 1),
+    (2, 10, 4),
+    (3, 7, 1),
+    (3, 6, 1),
+    (3, 12, 1),
+    (4, 6, 1);

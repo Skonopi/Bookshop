@@ -224,9 +224,9 @@ class ShopRepository {
       var res = await this.pool.query(sql, 
         [order['user_id'], order['address'], order['postal_code'], order['city'], order['finished']]);
       
-      for (var product_id of order['product_list']) {
-        sql = 'insert into OrdersProducts(order_id, product_id) values ($1, $2)';
-        await this.pool.query(sql, [res.rows[0].id, product_id]);
+      for (var product of order['product_list']) {
+        sql = 'insert into OrdersProducts(order_id, product_id, number) values ($1, $2, $3)';
+        await this.pool.query(sql, [res.rows[0].id, product[0], product[1]]);
       }
     }
     catch (err) {
@@ -480,7 +480,7 @@ function groupProducts(result) {
     if (!grouped[row.id]) {
       grouped[row.id] = {'info' : row, 'product_list' : []};
     }
-    grouped[row.id]['product_list'].push(row.product_id);
+    grouped[row.id]['product_list'].push([row.product_id, row.number]);
   }
 
   var res = [];
@@ -497,7 +497,7 @@ function groupProducts(result) {
  * Get all orders.
  */
 async function getOrders() {
-  var res = await repo.retrieve('orders', ['id', 'user_id', 'date', 'address', 'postal_code', 'city', 'finished', 'product_id']);
+  var res = await repo.retrieve('orders', ['id', 'user_id', 'date', 'address', 'postal_code', 'city', 'finished', 'product_id', 'number']);
   return groupProducts(res);
 }
 
@@ -514,15 +514,16 @@ async function getOrders() {
  * @param {object} conditions
  */
 async function getMatchingOrders(conditions) {
-  var res = await repo.retrieve('orders', ['id', 'user_id', 'date', 'address', 'postal_code', 'city', 'finished', 'product_id'], conditions);
+  var res = await repo.retrieve('orders', ['id', 'user_id', 'date', 'address', 'postal_code', 'city', 'finished', 'product_id', 'number'], conditions);
   return groupProducts(res);
 }
 
 /**
  * Insert order with given values.
  * values is a dictionary with pairs key:value.
- * Keys are user_id, address, postal_code, city, finished 
+ * Keys are user_id, address, postal_code, city, finished, product_list 
  * Finished can be true or false.
+ * Product_list is a list of [product_id, number_of_products].
  */
 async function insertOrder(values) {
   await repo.insertOrder(values);
