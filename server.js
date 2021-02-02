@@ -22,6 +22,7 @@ var emptyregister =  {'email':'','nickname':'','name':'','surname':'','password'
 app.get('/', async (req,res) => {
     try {
         console.log("GET index");
+
         var role = null;
         if (req.signedCookies.role){
             role = req.signedCookies.role;
