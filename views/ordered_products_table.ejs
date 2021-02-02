@@ -1,0 +1,33 @@
+<!-- table of ordered products -->
+
+<table class="table table-striped align-middle text-center table-hover">
+    <thead>
+        <tr>
+            <th scope="col" class="text-start">Book</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Prize</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% for(var i=0; i < products.length; i++){%>
+            <tr>
+                <th scope="row">
+                    <a href="/book?id=<%=products[i].book.id%>"><img class=" me-3" src=<%=products[i].book.image_path%>
+                        style="float:left" /></a>
+                    <p class="text-start">
+                        <a href="/book?id=<%=products[i].book.id%>">
+                            <%=products[i].book.title%>
+                        </a>
+                        </br>
+                        <%=products[i].book.author%>
+                    </p>
+                </th>
+                <td>
+                    <%=products[i].quantity%>
+                <td>
+                    <%=products[i].book.prize%>$
+                </td>
+            </tr>
+            <%}%>
+    </tbody>
+</table>
