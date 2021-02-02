@@ -15,7 +15,7 @@ class ShopRepository {
 
     // Categories of columns used to filter search results.
     this.text_columns = ['title', 'author', 'description'];
-    this.num_columns = ['price', 'publication year', 'date'];
+    this.num_columns = ['price', 'publication_year', 'date'];
     this.id_columns = ['id', 'genre_id', 'publisher_id', 'mail', 'user_id', 'finished'];
 
     // Lists of columns in tables.
