@@ -70,7 +70,7 @@
           <div class="form-floating mb-3">
             <input type="email" class="form-control" id="inputEmailRegister" name="emailRegister" value = "<%=register.email%>" required
               placeholder="Email address" />
-            <div class="invalid-feedback">
+            <div class="invalid-feedback"id="registerEmailInvalid">
               Valid email required.
             </div>
             <label for="inputEmailRegister">Email address</label>
@@ -118,6 +118,10 @@
         document.getElementById("registerNicknameInvalid").innerText = message;
         registerForm.classList.add("was-validated");
         console.log('register error nickname');
+      } else if (message == "Email already exists.") {
+        document.getElementById("registerEmailInvalid").innerText = message;
+        registerForm.classList.add("was-validated");
+        console.log('register error email');
       }
     }
   </script>
