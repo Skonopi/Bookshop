@@ -53,8 +53,12 @@ app.get('/', async (req,res) => {
 
         var query_properties = ['title','author','description'];
         var match = {};
-        //var searchtype=req.query.searchtype;
-        var searchtype = 'title';
+
+        var searchtype=req.query.searchtype;
+        if(!searchtype){
+            searchtype='title';
+        }
+        //var searchtype = 'title';
         var searchbar = req.query.searchbar;
         if(searchbar){
             match[searchtype]=[searchbar];
@@ -70,10 +74,17 @@ app.get('/', async (req,res) => {
             publisherfilter = req.cookies.publisherfilter;
         }
 
-        if(req.cookies.prize){
-            match.prize = req.cookies.prize;
+        var price = [null,null];
+        if(req.cookies.price && (req.cookies.price[0] || req.cookies.price[1])){
+            price = req.cookies.price;
+            match.price = [req.cookies.price];
         }
-        
+
+        var date = [null,null];
+        if(req.cookies.date  && (req.cookies.date[0] || req.cookies.date[1])){
+            date = req.cookies.date;
+            match.publication_year = [req.cookies.date];
+        }
 
         match.genre_id = genrefilter;
 
@@ -105,6 +116,8 @@ app.get('/', async (req,res) => {
             'publishers':publishers,
             'checkedGenres':genrefilter,
             'checkedPublishers':publisherfilter,
+            'price':price,
+            'date':date,
             'role':role};
         res.render('index_new.ejs',references);
 
@@ -121,8 +134,8 @@ app.post('/', (req,res) => {
     try {
         console.log("POST index");
 
-        //var searchtype = req.body.type;
-        var searchtype = 'title';
+        var searchtype = req.body.searchtype;
+        //var searchtype = 'title';
         var searchbar = req.body.searchbar;
 
         if(searchbar){
@@ -162,14 +175,23 @@ app.post('/filter', (req,res) => {
     }
     res.cookie('publisherfilter',publisherfilter);
 
-    var prize = [null,null];
-    if (req.body.prize_min){
-        prize[0] = req.body.prize_min;
+    var price = [null,null];
+    if (req.body.price_min){
+        price[0] = req.body.price_min;
     }
-    if (req.body.prize_max){
-        prize[1] = req.body.prize_max;
+    if (req.body.price_max){
+        price[1] = req.body.price_max;
     }
-    res.cookie('prize',prize);
+    res.cookie('price',price);
+
+    var date = [null,null];
+    if (req.body.date_min){
+        date[0] = req.body.date_min;
+    }
+    if (req.body.date_max){
+        date[1] = req.body.date_max;
+    }
+    res.cookie('date',date);
 
     var searchtype = req.query.type;
     var searchbar = req.query.searchbar;
@@ -274,10 +296,10 @@ app.get('/cart',authorize('client'), async (req,res) => {
                     id : book.id,
                     title : book.title,
                     author: book.author,
-                    prize: book.prize
+                    price: book.price
                 }
             });
-            total_cost += book.prize*parseInt(p);
+            total_cost += book.price*parseInt(p);
         };
     }
     cart.total_cost = total_cost;
