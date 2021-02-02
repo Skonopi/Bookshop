@@ -172,22 +172,6 @@ app.get('/login',(req,res) => {
 });
 app.post('/login',async (req,res) => {
     console.log('POST login');
-<<<<<<< HEAD
-    var email = req.body.email;
-    var pswd = req.body.password;
-
-    var check = (await db.getPasswordByMail(email))[0];
-    console.log(pswd + ' ' + check.password);
-    if(check){
-        var result = await bcrypt.compare(pswd,check.password);
-        if( result ){
-            res.cookie('user',check.id,{signed:true});
-            if(req.query.returnUrl){
-                res.redirect(req.query.returnUrl);
-            }
-            else{
-                res.render('index_new.ejs');
-=======
     if(req.body.registerBtn){
         console.log("Register");
         var u = {
@@ -240,7 +224,6 @@ app.post('/login',async (req,res) => {
             else{
                 console.log("Wrong password");
                 res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong password.',register:emptyregister});
->>>>>>> d87493504a604fce91a417f5e6c37083447b7229
             }
         }
         else{
@@ -254,8 +237,6 @@ app.get('/cart',authorize('client'),(req,res) => {
     res.render('cart.ejs', { order : {total_cost:0,products:[]} });
 });
 
-<<<<<<< HEAD
-=======
 app.post('/register',async (req,res) =>{
     var u = {
         mail:req.body.emailRegister,
@@ -293,7 +274,6 @@ app.get('/userslist',async (req,res) => {
     res.render('users.ejs',{users:users});
 });
 
->>>>>>> d87493504a604fce91a417f5e6c37083447b7229
 //user1 : 'abc'
 //user2: '123'
 //user3: 'abc123'
