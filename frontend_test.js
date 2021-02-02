@@ -47,13 +47,24 @@ for(var i = 0; i < 10; i++)
             id : i,
             title : "book" + i,
             author: "author" + i,
-            prize: i
+            prize: i,
+            image_path: "images/cover" + (i%2 + 1) + ".jpg"
         }
     })
 }
 var order = {
     total_cost: 10,
     products : products
+};
+
+var order_db = {
+    id : 1234,
+    date : '2020-01-01',
+    address : 'addressy street 5',
+    postal_code : '123-45',
+    city : 'wroclaw',
+    finished : true,
+    products : products,
 };
 app.get('/users', (req, res) => {
     res.render('users.ejs', { users : users });
@@ -75,6 +86,9 @@ app.get('/error', (req, res) => {
 });
 app.get('/products', (req, res) => {
     res.render('products.ejs', { products: products});
+});
+app.get('/order', (req, res) => {
+    res.render('order.ejs', { order : order_db});
 });
 app.get('/book_admin', (req, res) => {
     res.render('book_admin.ejs', { book: books[0], genres: ['1', '2', '3', '4'], publishers: ['a', 'b', 'c', 'd']}); // or book : null for adding new book
