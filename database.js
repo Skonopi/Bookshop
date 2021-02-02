@@ -152,8 +152,7 @@ class ShopRepository {
     }
   }
 
-  async insertProduct(title, author, price, genre, publisher, 
-    publication_year, binding, description, image_path) {
+  async insertProduct(data) {
     try {
       var values = [];
       var sql = 
@@ -162,6 +161,7 @@ class ShopRepository {
         publication_year, binding, description, image_path) 
       values($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
 
+      var genre = data['genre'];
       if (genre) {
         // Get id of requested genre.
         var result = await this.pool.query('select id from genres where upper(genre) = upper($1)', [genre]);
@@ -173,6 +173,7 @@ class ShopRepository {
         genre = result.rows[0].id;
       }
 
+      var publisher = data['publisher'];
       if (publisher) {
         // Get id of requested publisher.
         var result = await this.pool.query('select id from publishers where upper(publisher) = upper($1)', [publisher]);
@@ -184,7 +185,9 @@ class ShopRepository {
         publisher = result.rows[0].id;
       }
       
-      var values = [title, author, price, genre, publisher, publication_year, binding, description, image_path];
+      var values = [
+        data['title'], data['author'], data['price'], genre, publisher, 
+        data['publication_year'], data['binding'], data['description'], data['image_path']];
       await this.pool.query(sql, values);
     }
     catch (err) {
@@ -192,11 +195,11 @@ class ShopRepository {
     }
   }
 
-  async insertUser(mail, nickname, name, surname, password, role) {
+  async insertUser(data) {
     try {
       // Get id of the requested role.
       var sql = 'select id from roles where upper(role) = upper($1)';
-      var res = await this.pool.query(sql, [role]);
+      var res = await this.pool.query(sql, [data['role']]);
       if (res.rows.length == 0) {
         throw "Role does not exist.";
       }
@@ -205,7 +208,7 @@ class ShopRepository {
       sql = `insert into users(
         mail, nickname, name, surname, password, role_id, creation_date) 
       values ($1, $2, $3, $4, $5, $6, current_date)`;
-      var values = [mail, nickname, name, surname, password, role_id];
+      var values = [data['mail'], data['nickname'], data['name'], data['surname'], data['password'], role_id];
 
       await this.pool.query(sql, values);
     }
@@ -385,19 +388,14 @@ async function getPublishers() {
 }
 
 /**
- * Insert product with given values. Each of them can be null.
- * @param {string} title 
- * @param {string} author 
- * @param {number} price 
- * @param {string} genre 
- * @param {string} publisher 
- * @param {number} publication_year 
- * @param {string} binding 
- * @param {string} description 
- * @param {string} image_path 
+ * Insert product with given values.
+ * values is a dictionary with entries:
+ * title: string, author: string, price: number
+ * genre: string, publisher: string, publication_year: number 
+ * binding: string, description: string, image_path: string.
  */
-async function insertProduct(title, author, price, genre, publisher, publication_year, binding, description, image_path) {
-  await repo.insertProduct(title, author, price, genre, publisher, publication_year, binding, description, image_path);
+async function insertProduct(values) {
+  await repo.insertProduct(values);
 }
 
 /**
@@ -456,15 +454,12 @@ async function deleteUser(id) {
 
 /**
  * Insert user with given values.
- * @param {string} mail 
- * @param {string} nickname 
- * @param {string} name 
- * @param {string} surname 
- * @param {string} password 
- * @param {string} role 
+ * values is a dictionary with pairs key:string.
+ * Keys are mail, nickname, name, surname, password, role. 
+ * role can be either 'client' or 'admin'.
  */
-async function insertUser(mail, nickname, name, surname, password, role) {
-  await repo.insertUser(mail, nickname, name, surname, password, role);
+async function insertUser(values) {
+  await repo.insertUser(values);
 }
 
 /**
