@@ -162,7 +162,7 @@ class ShopRepository {
       `insert into products (
         title, author, price, genre_id, publisher_id, 
         publication_year, binding, description, image_path) 
-      values($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
+      values($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id`;
 
       var genre = data['genre'];
       if (genre) {
@@ -191,7 +191,8 @@ class ShopRepository {
       var values = [
         data['title'], data['author'], data['price'], genre, publisher, 
         data['publication_year'], data['binding'], data['description'], data['image_path']];
-      await this.pool.query(sql, values);
+      var res = await this.pool.query(sql, values);
+      return res.rows;
     }
     catch (err) {
       throw "Database error."
@@ -210,10 +211,11 @@ class ShopRepository {
       var role_id = res.rows[0].id;
       sql = `insert into users(
         mail, nickname, name, surname, password, role_id, creation_date) 
-      values ($1, $2, $3, $4, $5, $6, current_date)`;
+      values ($1, $2, $3, $4, $5, $6, current_date) returning id`;
       var values = [data['mail'], data['nickname'], data['name'], data['surname'], data['password'], role_id];
 
-      await this.pool.query(sql, values);
+      var res = await this.pool.query(sql, values);
+      return res.rows;
     }
     catch (err) {
       this.handleError(err);
@@ -231,6 +233,8 @@ class ShopRepository {
         sql = 'insert into OrdersProducts(order_id, product_id, number) values ($1, $2, $3)';
         await this.pool.query(sql, [res.rows[0].id, product[0], product[1]]);
       }
+      return res.rows;
+
     }
     catch (err) {
       throw "Database error";
@@ -409,14 +413,15 @@ async function getPublishers() {
 }
 
 /**
- * Insert product with given values.
+ * Insert product with given values. Returns id of inseted product.
  * values is a dictionary with entries:
  * title: string, author: string, price: number
  * genre: string, publisher: string, publication_year: number 
  * binding: string, description: string, image_path: string.
  */
 async function insertProduct(values) {
-  await repo.insertProduct(values);
+  var res = await repo.insertProduct(values);
+  return res[0].id;
 }
 
 /**
@@ -474,13 +479,14 @@ async function deleteUser(id) {
 }
 
 /**
- * Insert user with given values.
+ * Insert user with given values. Returns id of inserted user.
  * values is a dictionary with pairs key:string.
  * Keys are mail, nickname, name, surname, password, role. 
  * role can be either 'client' or 'admin'.
  */
 async function insertUser(values) {
-  await repo.insertUser(values);
+  var res = await repo.insertUser(values);
+  return res[0].id;
 }
 
 /**
@@ -539,12 +545,13 @@ async function getMatchingOrders(conditions) {
 }
 
 /**
- * Insert order with given values.
+ * Insert order with given values. Returns id of inserted order.
  * values is a dictionary with pairs key:value.
  * Keys are user_id, address, postal_code, city, finished, product_list 
  * Finished can be true or false.
  * Product_list is a list of [product_id, number_of_products].
  */
 async function insertOrder(values) {
-  await repo.insertOrder(values);
+  var res = await repo.insertOrder(values);
+  return res[0].id;
 }
