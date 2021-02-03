@@ -26,9 +26,9 @@
             <button class="btn btn-outline-secondary" type="submit">Search</button>
 
             <select class="form-select" id="searchtypeSelection" name="searchtype">
-              <option value="title">title</option>
-              <option value="author">author</option>
-              <option value="description">description</option>
+              <option value="Title">Title</option>
+              <option value="Author">Author</option>
+              <option value="Description">Description</option>
             </select>
 
             <!-- <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -164,20 +164,27 @@
 
             <nav aria-label="Page navigation example">
               <ul class="pagination justify-content-center">
-                <!-- <li class="page-item">
-                  <a class="page-link" href="#" aria-label="Previous">
+                <li class="page-item">
+                  <a class="page-link"
+                    href="/?type=<%=searchtype%>&searchbar=<%=searchbar%>&page=<%=Math.max(1, page - 1)%>"
+                    aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                   </a>
-                </li> -->
-                <% for(var i=1; i <= Math.ceil(books.length / 5.0); i++){%>
-                  <li class="page-item <%if(i == 1){%> active <%}%>" >
-                    <a class="page-link text-dark" href="/?type=<%=searchtype%>&searchbar=<%=searchbar%>&page=<%=i%>"><%=i%></a>
+                </li>
+                <% for(var i=1; i <=maxpage; i++){%>
+                  <li class="page-item <%if(i == page){%> active <%}%>">
+                    <a class="page-link" href="/?type=<%=searchtype%>&searchbar=<%=searchbar%>&page=<%=i%>">
+                      <%=i%>
+                    </a>
                   </li>
                   <%}%>
-                      <!-- <a class="page-link" href="#" aria-label="Next">
+                    <li class="page-item">
+                      <a class="page-link"
+                        href="/?type=<%=searchtype%>&searchbar=<%=searchbar%>&page=<%=Math.min(maxpage,page+1)%>"
+                        aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                       </a>
-                    </li> -->
+                    </li>
               </ul>
             </nav>
       </div>
