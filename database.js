@@ -1,5 +1,5 @@
 module.exports = {
-  getAllProducts, getSomeProducts, getMatchingProducts, 
+  getAllProducts, getSomeProducts, getMatchingProducts, getMatchingProductsCount,
   getProductDetails, getProductDetailsDescriptive, getGenres, getPublishers, 
   insertProduct, deleteProduct, updateProduct,
   getUsers, getPasswordByMail, getUserById,
@@ -108,7 +108,10 @@ class ShopRepository {
 
     var sql, values;
     if (columns) {
-      sql = `select t.${columns.join(',')} from ${table} t`; 
+      if (columns[0] == 'count(*)')
+        sql = `select ${columns.join(',')} from ${table} t`;
+      else
+        sql = `select t.${columns.join(',')} from ${table} t`; 
     }
     else {
       sql = `select * from ${table} t`;
@@ -350,6 +353,23 @@ async function getSomeProducts(limit, offset) {
 async function getMatchingProducts(conditions, limit, offset) {
   var res = await repo.retrieve('products', ['id', 'title', 'author', 'image_path', 'price'], conditions, limit, offset);
   return res;
+}
+
+/**
+ * Get number of products that match given conditions.
+ * Conditions is a dictionary of form property: list of possible values.
+ * For text properties values are strings.
+ * For numeric properties values are lists [min_value, max_value].
+ * If min_value is null, it is treated as -inf. Similarly max_value.
+ * For id properties values are ids.
+ * Valid text properties: title, author, description.
+ * Valid numeric properties: price, publication_year.
+ * Valid id properties: id, genre_id, publisher_id.
+ * @param {object} conditions
+ */
+async function getMatchingProductsCount(conditions) {
+  var res = await repo.retrieve('products', ['count(*)'], conditions);
+  return res[0].count;
 }
 
 /**
