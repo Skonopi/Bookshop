@@ -457,7 +457,7 @@ async function getUsers() {
  * @param {string} mail 
  */
 async function getPasswordByMail(mail) {
-  var res = await repo.retrieve('users', ['id', 'password'], {'mail' : [mail]});
+  var res = await repo.retrieve('users', ['id', 'password', 'role'], {'mail' : [mail]});
   return res;
 }
 
