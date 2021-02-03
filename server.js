@@ -214,6 +214,21 @@ app.get('/book',async (req,res) => {
     }
 });
 
+app.get('/bookedit',async (req,res) => {
+    try {
+        console.log("GET book");
+        var bookid = req.query.id;
+        var book = await db.getProductDetailsDescriptive(parseInt(bookid));
+        console.log(book);
+        res.render('book_admin.ejs', { 'book':book[0], 'searchbar': '', 'searchtype': 'title'});
+    } catch (error) {
+        console.log("Error while reading database");
+        console.log(error);
+        res.end("Error while reading database");
+        // res.redirect("/error",{type:"database error",error});
+    }
+});
+
 app.get('/login',(req,res) => {
     console.log("GET login");
     res.render('login.ejs',{returnUrl:req.query.returnUrl,register:emptyregister});
@@ -242,9 +257,11 @@ app.post('/login',async (req,res) => {
             switch( error ){
                 case 'Mail already exists.':
                     //console.log("Szach mat zły mail.");
+                    u.mail = '';
                     res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Email already exists.',register:u});
                     break;
                 case 'Nickname already exists.':
+                    u.nickname = '';
                     res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Nickname already exists.',register:u});
                     break;
                 default:
@@ -375,7 +392,8 @@ function authorize(permissions) {
                 }
                 else{
                     console.log(`As ${user.role} you have no acces to requested page.`);
-                    res.render('login.ejs',{returnUrl:req.query.returnUrl,message:`As ${user.role} you have no acces to requested page.`});
+                    res.redirect('/login?returnUrl='+req.url);
+                    //res.render('login.ejs',{returnUrl:req.query.returnUrl,message:`As ${user.role} you have no acces to requested page.`,register:emptyregister});
                 }
             }
             catch (error) {

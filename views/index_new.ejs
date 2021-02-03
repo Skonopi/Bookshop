@@ -135,7 +135,7 @@
               <% for(var i=0; i < books.length; i++){%>
                 <div class="col d-flex align-items-stretch">
                   <div class="card">
-                    <a href="/book?id=<%=books[i].id%>"><img src="<%=books[i].image_path%>" class="card-img-top"
+                    <a href=<%"/book?id=<%=books[i].id%>"><img src="<%=books[i].image_path%>" class="card-img-top"
                         alt="<%=books[i].image_path%>"></a>
                     <div class="card-body">
                       <h6 class="card-title fw-bold">
