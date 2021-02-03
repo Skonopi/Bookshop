@@ -51,17 +51,25 @@ app.get('/', async (req,res) => {
             role = req.signedCookies.role;
         }
 
-        var query_properties = ['title','author','description'];
+        var query_properties = ['Title','Author','Description'];
         var match = {};
 
         var searchtype=req.query.type;
-        if(!searchtype){
-            searchtype='title';
+        if(!searchtype || !query_properties.includes(searchtype)){
+            searchtype='Title';
         }
         //var searchtype = 'title';
         var searchbar = req.query.searchbar;
         if(searchbar){
             match[searchtype]=[searchbar];
+        }
+
+        var page = 1;
+        if(req.query.page ){
+            page = parseInt(req.query.page);
+            if(!Number.isInteger(page) || page<1){
+                page = 1;
+            }
         }
 
         var genrefilter = []
@@ -89,10 +97,6 @@ app.get('/', async (req,res) => {
         match.genre_id = genrefilter;
 
         match.publisher_id = publisherfilter;
-        
-        var genres = await db.getGenres();
-        var publishers = await db.getPublishers();
-        var books;
 
         console.log("Match:" );
         if (match){
@@ -101,11 +105,35 @@ app.get('/', async (req,res) => {
             });
         }
 
-        if (match){
-            books = await db.getMatchingProducts(match);
+        try{
+            var genres = await db.getGenres();
+            var publishers = await db.getPublishers();
         }
-        else {
-            books = await db.getAllProducts();
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+        }
+
+        var books;
+        try{
+            if (match){
+                var numofelem = await db.getMatchingProductsCount(match);
+                var maxpage = Math.ceil(numofelem/10);
+                if(page > maxpage){
+                    page = maxpage;
+                }
+                books = await db.getMatchingProducts(match,10,(page-1)*10);
+            }
+            else {
+                books = await db.getAllProducts();
+            }
+        }
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
         }
 
         var references = 
@@ -118,14 +146,17 @@ app.get('/', async (req,res) => {
             'checkedPublishers':publisherfilter,
             'price':price,
             'date':date,
-            'role':role};
+            'role':role,
+            'page':page,
+            'maxpage':maxpage
+        };
         res.render('index_new.ejs',references);
 
         
     } catch (error) {
         console.log("Error while reading database");
         console.log(error);
-        res.end("Error while reading database");
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
        // res.redirect("/error",{type:"database error",error});
     }
 });
