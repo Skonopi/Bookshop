@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="stylesheets/main_view.css" />
 </head>
 
-<body onload='rememberedSearchtype("<%=searchtype%>")'>
+<body onload='onLoad("<%=searchtype%>", "<%=role%>")'>
   <header>
     <nav class="navbar navbar-dark bg-dark fixed-top">
       <div class="container-sm d-flex">
@@ -30,31 +30,33 @@
               <option value="Author">Author</option>
               <option value="Description">Description</option>
             </select>
-
-            <!-- <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-              aria-expanded="false">Category</button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="form-control dropdown-item">Title</a></li>
-              <li><a class="form-control dropdown-item">Author</a></li>
-              <li><a class="form-control dropdown-item">Description</a></li>
-            </ul> -->
           </div>
         </form>
-        <% if(role===null){%>
-          <button class="btn btn-outline-secondary" id="loginBtn">
-            Log in
+        <button class="btn btn-outline-secondary anonymous-only" id="loginBtn">
+          Log in
+        </button>
+
+        <div class="dropdown logged-in">
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton2"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi-person-circle"></i>
           </button>
-          <%} else {%>
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-              aria-expanded="false">Profile</button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="form-control dropdown-item">Placeholder</a></li>
-            </ul>
-            <a class="btn btn-outline-secondary" href="/cart">Cart</a>
-            <%}%>
-              <!-- <button class="btn btn-outline-secondary" id="cartBtn">
-                Cart
-              </button> -->
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
+            <li><a class="dropdown-item active" href="/profile">Profile</a></li>
+            <li><a class="dropdown-item client-only" href="/orders">My orders</a></li>
+
+            <li><a class="dropdown-item admin-only" href="/orders">Orders</a></li>
+            <li><a class="dropdown-item admin-only" href="/users">Users</a></li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="#">Log out</a></li>
+          </ul>
+        </div>
+
+        <a class="btn btn-outline-secondary client-only" href="/cart">Cart</a>
+        <a class="btn btn-outline-secondary admin-only" href="/cart">Add product</a>
+
       </div>
     </nav>
   </header>
@@ -135,8 +137,8 @@
               <% for(var i=0; i < books.length; i++){%>
                 <div class="col d-flex align-items-stretch">
                   <div class="card">
-                    <a href="/<%=((role != 'admin') ? 'book' : 'bookedit')%>?id=<%=books[i].id%>"><img src="<%=books[i].image_path%>" class="card-img-top"
-                        alt="<%=books[i].image_path%>"></a>
+                    <a href="/<%=((role != 'admin') ? 'book' : 'bookedit')%>?id=<%=books[i].id%>"><img
+                        src="<%=books[i].image_path%>" class="card-img-top" alt="<%=books[i].image_path%>"></a>
                     <div class="card-body">
                       <h6 class="card-title fw-bold">
                         <%=books[i].title%>
@@ -149,14 +151,13 @@
                       </p>
                     </div>
 
-                    <%if(role !='admin' ){%>
-                      <form method="post" action="\tocart?type=<%=searchtype%>&searchbar=<%=searchbar%>">
-                        <div class="card-footer d-flex align-items-stretch justify-content-center">
-                          <button type="submit" name="cartBtn" value="<%=books[i].id%>" class="btn btn-dark">Add to
-                            cart</button>
-                        </div>
-                        <%}%>
-                      </form>
+                    <form class="non-admin" method="post"
+                      action="\tocart?type=<%=searchtype%>&searchbar=<%=searchbar%>">
+                      <div class="card-footer d-flex align-items-stretch justify-content-center">
+                        <button type="submit" name="cartBtn" value="<%=books[i].id%>" class="btn btn-dark">Add to
+                          cart</button>
+                      </div>
+                    </form>
                   </div>
                 </div>
                 <%}%>
@@ -192,11 +193,19 @@
     </div>
   </main>
   <script>
+    function onLoad(searchtype, role) {
+      // console.log(role, searchtype);
+      toggleViewRolebased(role);
+      rememberedSearchtype(searchtype);
+    }
+  </script>
+  <script>
     function rememberedSearchtype(type) {
       console.log(type);
       document.getElementById('searchtypeSelection').value = type;
     }
   </script>
+  <script src="scripts/toggleViewRolebased.js"></script>
   <script>
     var filters = document.getElementsByName("filter");
     //console.log(filters);
