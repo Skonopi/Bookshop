@@ -57,6 +57,7 @@
                         <th scope="col">Name</th>
                         <th scope="col">Surname</th>
                         <th scope="col">Since</th>
+                        <th scope="col"></th>
                         <!-- <th scope="col">Role</th> -->
                     </tr>
                 </thead>
@@ -79,7 +80,10 @@
                                 <%=users[i].surname%>
                             </td>
                             <td>
-                                2010-01-01
+                                <%=users[i].creation_date%>
+                            </td>
+                            <td>
+                                <a href="">Delete</a>
                             </td>
                         </tr>
                         <%}%>
