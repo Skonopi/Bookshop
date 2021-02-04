@@ -36,6 +36,7 @@ for(var i = 0; i < 10; i++)
         nickname : "user" + i,
         name : "user" + i,
         surname : "userowich" + i,
+        creation_date: '2020-01-01'
     });
 }
 var products = [];
@@ -100,7 +101,10 @@ app.get('/orders', (req, res) => {
     res.render('orders.ejs', { orders : orders});
 });
 app.get('/book_admin', (req, res) => {
-    res.render('book_admin.ejs', { book: books[0], genres: ['1', '2', '3', '4'], publishers: ['a', 'b', 'c', 'd']}); // or book : null for adding new book
+    res.render('book_admin.ejs', { book: books[0]}); // or book : null for adding new book
+});
+app.get('/user_profile', (req, res) => {
+    res.render('user_profile.ejs', { user: users[0]}); // or book : null for adding new book
 });
 
 
