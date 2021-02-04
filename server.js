@@ -619,5 +619,5 @@ app.post('/tocart',(req,res) => {
     }
 });
 
-http.createServer(app).listen(3000);
+http.createServer(app).listen(process.env.PORT || 3000);
 console.log("Server is listening.");
