@@ -41,26 +41,54 @@ CREATE TABLE products (
     publisher_id INT, 
     publication_year INT, 
     binding VARCHAR(50), 
-    description VARCHAR(1000), 
+    description VARCHAR(2000), 
     image_path VARCHAR(255),
     FOREIGN KEY (genre_id) REFERENCES genres(id),
     FOREIGN KEY (publisher_id) REFERENCES publishers(id));
 
-INSERT INTO products(title, author, price, genre_id, publisher_id, publication_year, image_path) values
-    ('Dziady', 'Adam Mickiewicz', 40, 1, 2, 1970, './images/book1.jpeg'),
-    ('Autostopem przez galaktykę', 'Douglas Adams', 42, 3, 4, 1966, './images/book2.jpeg'),
-    ('Kolor magii', 'Terry Pratchett', 150, 2, 5, 1989, './images/book3.jpeg'),
-    ('Władca pierścieni', 'Tolkien', 35.50, 2, 3, 1950, NULL),
-    ('Przygody Sherlocka Holmesa', 'Sir Arthur Conan Doyle', 70, 6, 1, 1890, './images/book1.jpeg'),
-    ('Księga przypadków Sherlocka Holmesa', 'Sir Arthur Conan Doyle', 69.99, 6, 1, 1895, './images/book2.jpeg'),
-    ('Marsjanin', 'Andy Weir', 42.39, 2, 3, 2010, './images/book3.jpeg'),
-    ('Kosmiczny poradnik życia na Ziemi', 'Chris Hadfield', 28, 4, 3, 2015, NULL),
-    ('Ostatni oddech Cezara', 'Sam Kean', 39.99, 5, 3, 2012, './images/book1.jpeg'),
-    ('Dziwne przypadki ludzkiego mózgu', 'Sam Kean', 39.99, 5, 3, 2015, './images/book2.jpeg'),
-    ('Felix, Net i Nika', 'Rafał Kosik', 33.33, 3, 4, 2008, './images/book3.jpeg'),
-    ('Pan raczy żartować, panie Feynman', 'Richard Feynman', 47, 4, 4, 1971, './images/book1.jpeg'),
-    ('Morderstwo w Orient Expressie', 'Agatha Christie', 18.50, 6, 5, 1920, './images/book2.jpeg'),
-    ('Morderstwo odbędzie się', 'Agatha Christie', 21, 6, 5, 1925, './images/book3.jpeg');
+INSERT INTO products(title, author, price, genre_id, publisher_id, publication_year, image_path, description) values
+    ('Dziady', 'Adam Mickiewicz', 40, 1, 2, 1970, './images/book1.jpeg',
+    'Dziady Adama Mickiewicza to jeden z najbardziej znanych utworów w literaturze polskiej
+     i jednocześnie jedno z dzieł najbardziej reprezentatywnych dla polskiego romantyzmu. 
+     Od lat regularnie wystawiane na deskach teatrów całej Polski, czytane przez kolejne pokolenia czytelników, 
+     inspirujące twórców i niosące wciąż aktualne treści. Każda z części utworu porusza inne tematy, ale razem 
+     tworzą spójną wizję świata rządzonego przez niezmienne prawa boskiej sprawiedliwości i miłosierdzia. - lubimyczytac.pl'),
+    ('Autostopem przez galaktykę', 'Douglas Adams', 42, 3, 4, 1966, './images/book2.jpeg',
+    'Pewnego dnia młody Ziemianin Arthur dowiaduje się z zaskoczeniem, że jego najbliższy przyjaciel Ford jest kosmitą, 
+    a Ziemia niemal za chwilę zostanie zniszczona, gdyż znajduje się na trasie planowanej międzygalaktycznej autostrady. 
+    Jak mu przekazuje beznamiętnie przyjaciel, informacja o tych planach została już dośc dawno wywieszona w jakimś galaktycznym 
+    urzędzie na planecie Alfa Centauri, tyle że Ziemianie ich nie oprotestowali, co oznacza że wyrażają zgodę. 
+    Unicestwienie ojczystej planety oraz zagłada całego ludzkiego gatunku to dla Arthura dopiero początek niesamowitych przygód, 
+    albowiem tuż przed katastrofą Ford zabiera go statkiem kosmicznym w podróż po Galaktyce, w trakcie której zbiera materiały do 
+    nowej edycji kompendium wszelkiej znanej wiedzy, czyli przewodnika Autostopem przez Galaktykę. W trakcie tej niekończącej się podróży, 
+    odbywanej między innymi w towarzystwie neurotycznego robota Marvina, 
+    Arthur spróbuje rozwiązać największą zagadkę kosmosu oraz spróbuje pojąć sens życia. - lubimyczytac.pl'),
+    ('Kolor magii', 'Terry Pratchett', 150, 2, 5, 1989, './images/book3.jpeg', NULL),
+    ('Władca pierścieni', 'Tolkien', 35.50, 2, 3, 1950, NULL, NULL),
+    ('Przygody Sherlocka Holmesa', 'Sir Arthur Conan Doyle', 70, 6, 1, 1890, './images/book1.jpeg', NULL),
+    ('Księga przypadków Sherlocka Holmesa', 'Sir Arthur Conan Doyle', 69.99, 6, 1, 1895, './images/book2.jpeg', NULL),
+    ('Marsjanin', 'Andy Weir', 42.39, 2, 3, 2010, './images/book3.jpeg',
+    'Mark Watney kilka dni temu był jednym z pierwszych ludzi, którzy stanęli na Marsie.
+    Teraz jest pewien, że będzie pierwszym, który tam umrze!
+    Straszliwa burza piaskowa sprawia, że marsjańska ekspedycja, w której skład wchodzi Mark Watney, 
+    musi ratować się ucieczką z Czerwonej Planety. Kiedy ciężko ranny Mark odzyskuje przytomność, stwierdza, że został na 
+    Marsie sam w zdewastowanym przez wichurę obozie, z minimalnymi zapasami powietrza i żywności, 
+    a na dodatek bez łączności z Ziemią. - lubimyczytac.pl'),
+    ('Kosmiczny poradnik życia na Ziemi', 'Chris Hadfield', 28, 4, 3, 2015, NULL,
+    'Chris Hadfield już jako mały chłopiec marzył o podróżach kosmicznych. W kosmosie spędził prawie 4000 godzin. 
+    Podczas swoich licznych misji musiał między innymi włamać się do stacji kosmicznej z pomocą żołnierskiego noża; 
+    wyrzucić żywego węża z kabiny samolotu, który właśnie pilotował; został też na pewien czas oślepiony podczas „spaceru” na orbicie i 
+    do promu kosmicznego wracał po omacku. Do najniebezpieczniejszych zdarzeń potrafi podejść z rozbrajającym dystansem. - lubimyczytac.pl'),
+    ('Ostatni oddech Cezara', 'Sam Kean', 39.99, 5, 3, 2012, './images/book1.jpeg', NULL),
+    ('Dziwne przypadki ludzkiego mózgu', 'Sam Kean', 39.99, 5, 3, 2015, './images/book2.jpeg', NULL),
+    ('Felix, Net i Nika', 'Rafał Kosik', 33.33, 3, 4, 2008, './images/book3.jpeg',
+    'Felix, Net i Nika jadą na zimowisko do pensjonatu „Trzy kuzynki”, położonego w lesie, w górach na odludziu, 
+    a prowadzonego przez bardzo dziwne starsze panie. Stare meble i przedziwne obrazy tworzą niezwykłą atmosferę, 
+    a naprawdę strasznie zaczyna się robić, kiedy nocą ktoś chodzi po domu, 
+    pozostawiając przerażonym gimnazjalistom dziwne niespodzianki. - lubimyczytac.pl'),
+    ('Pan raczy żartować, panie Feynman', 'Richard Feynman', 47, 4, 4, 1971, './images/book1.jpeg', NULL),
+    ('Morderstwo w Orient Expressie', 'Agatha Christie', 18.50, 6, 5, 1920, './images/book2.jpeg', NULL),
+    ('Morderstwo odbędzie się', 'Agatha Christie', 21, 6, 5, 1925, './images/book3.jpeg', NULL);
 
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
