@@ -44,6 +44,7 @@ var emptyregister =  {'email':'','nickname':'','name':'','surname':'','password'
 
 app.get('/', async (req,res) => {
     try {
+        db.getMatchingProducts({description:'ad'});
         console.log("GET index");
 
         var role = null;
@@ -61,7 +62,7 @@ app.get('/', async (req,res) => {
         //var searchtype = 'title';
         var searchbar = req.query.searchbar;
         if(searchbar){
-            match[searchtype]=[searchbar];
+            match[searchtype.toLowerCase()]=[searchbar];
         }
 
         var page = 1;
@@ -113,6 +114,7 @@ app.get('/', async (req,res) => {
             res.render('error.ejs', { error : {id: 1, description: error}});
             console.log(error);
             res.end();
+            return;
         }
 
         var books;
@@ -120,7 +122,7 @@ app.get('/', async (req,res) => {
             if (match){
                 var numofelem = await db.getMatchingProductsCount(match);
                 var maxpage = Math.ceil(numofelem/10);
-                if(page > maxpage){
+                if(page > maxpage && page > 1 ){
                     page = maxpage;
                 }
                 books = await db.getMatchingProducts(match,10,(page-1)*10);
@@ -135,6 +137,7 @@ app.get('/', async (req,res) => {
             res.end();
             return;
         }
+        console.log(role);
 
         var references = 
             {'books':books,
@@ -154,7 +157,6 @@ app.get('/', async (req,res) => {
 
         
     } catch (error) {
-        console.log("Error while reading database");
         console.log(error);
         res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
        // res.redirect("/error",{type:"database error",error});
@@ -166,7 +168,7 @@ app.post('/', (req,res) => {
         console.log("POST index");
 
         var searchtype = req.body.searchtype;
-        console.log(req.body.searchtype);
+        //console.log(req.body.searchtype);
         //var searchtype = 'title';
         var searchbar = req.body.searchbar;
 
@@ -175,73 +177,81 @@ app.post('/', (req,res) => {
         }
         else res.redirect('/');
     } catch (error) {
-        console.log("Error while reading database");
         console.log(error);
-        res.end("Error while reading database");
-        // res.redirect("/error",{type:"database error",error});
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
     }
 });
 
 app.post('/filter', (req,res) => {
-    console.log("POST filter");
-    var genrefilter = [];
-    var array = req.body.genrefilter;
+    try{
+        console.log("POST filter");
+        var genrefilter = [];
+        var array = req.body.genrefilter;
 
-    if (array) {
-        if (!Array.isArray(array)) {array = [array];}
-        array.forEach(g => {
-            genrefilter.push(parseInt(g.slice(2)));
-        });
-    }
-    res.cookie('genrefilter',genrefilter);
-    
-   
-    var publisherfilter = [];
+        if (array) {
+            if (!Array.isArray(array)) {array = [array];}
+            array.forEach(g => {
+                genrefilter.push(parseInt(g.slice(2)));
+            });
+        }
+        res.cookie('genrefilter',genrefilter);
+        
+        var publisherfilter = [];
 
-    array = req.body.publisherfilter;
-    if (array) {
-        if (!Array.isArray(array)) {array = [array];}
-        array.forEach(p => {
-            publisherfilter.push(parseInt(p.slice(2)));
-        });
-    }
-    res.cookie('publisherfilter',publisherfilter);
+        array = req.body.publisherfilter;
+        if (array) {
+            if (!Array.isArray(array)) {array = [array];}
+            array.forEach(p => {
+                publisherfilter.push(parseInt(p.slice(2)));
+            });
+        }
+        res.cookie('publisherfilter',publisherfilter);
 
-    var price = [null,null];
-    if (req.body.price_min){
-        price[0] = req.body.price_min;
-    }
-    if (req.body.price_max){
-        price[1] = req.body.price_max;
-    }
-    res.cookie('price',price);
+        var price = [null,null];
+        if (req.body.price_min){
+            price[0] = req.body.price_min;
+        }
+        if (req.body.price_max){
+            price[1] = req.body.price_max;
+        }
+        res.cookie('price',price);
 
-    var date = [null,null];
-    if (req.body.date_min){
-        date[0] = req.body.date_min;
-    }
-    if (req.body.date_max){
-        date[1] = req.body.date_max;
-    }
-    res.cookie('date',date);
+        var date = [null,null];
+        if (req.body.date_min){
+            date[0] = req.body.date_min;
+        }
+        if (req.body.date_max){
+            date[1] = req.body.date_max;
+        }
+        res.cookie('date',date);
 
-    var searchtype = req.query.type;
-    var searchbar = req.query.searchbar;
-    res.redirect(`/?type=${searchtype}&searchbar=${searchbar}`);
+        var searchtype = req.query.type;
+        var searchbar = req.query.searchbar;
+        res.redirect(`/?type=${searchtype}&searchbar=${searchbar}`);
+    } catch(error){
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
 });
 
 app.get('/book',async (req,res) => {
     try {
         console.log("GET book");
-        var bookid = req.query.id;
-        var book = await db.getProductDetailsDescriptive(parseInt(bookid));
+        var bookid = parseInt(req.query.id);
+        try{
+            var book = await db.getProductDetailsDescriptive(bookid);
+        }
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
+        }
         console.log(book);
         res.render('book.ejs', { 'book':book[0], 'searchbar': '', 'searchtype': 'title'});
     } catch (error) {
-        console.log("Error while reading database");
         console.log(error);
-        res.end("Error while reading database");
-        // res.redirect("/error",{type:"database error",error});
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
     }
 });
 
@@ -249,151 +259,225 @@ app.get('/bookedit',async (req,res) => {
     try {
         console.log("GET book");
         var bookid = req.query.id;
-        var book = await db.getProductDetailsDescriptive(parseInt(bookid));
-        console.log(book);
+        try{
+            var book = await db.getProductDetailsDescriptive(parseInt(bookid));
+        }
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
+        }
         res.render('book_admin.ejs', { 'book':book[0], 'searchbar': '', 'searchtype': 'title'});
     } catch (error) {
-        console.log("Error while reading database");
         console.log(error);
-        res.end("Error while reading database");
-        // res.redirect("/error",{type:"database error",error});
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
     }
 });
 
 app.get('/login',(req,res) => {
-    console.log("GET login");
-    res.render('login.ejs',{returnUrl:req.query.returnUrl,register:emptyregister});
-});
+    try{
+        console.log("GET login");
+        res.render('login.ejs',{returnUrl:req.query.returnUrl,register:emptyregister});
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }});
 app.post('/login',async (req,res) => {
     console.log('POST login');
-    if(req.body.registerBtn){
-        console.log("Register");
-        //var password = await bcrypt.hash(req.body.passwordRegister, 12 );
-        var u = {
-            mail:req.body.emailRegister,
-            nickname:req.body.nicknameRegister,
-            name:req.body.nameRegister,
-            surname:req.body.surnameRegister,
-            password:req.body.passwordRegister,
-            role:'client'
-        };
-        var udb = Object.assign({},u);
-        udb.password = await bcrypt.hash(u.password, 12 );
-        try{
-            await db.insertUser(udb);
-            res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Register completed. You can now log in.',register:emptyregister});
-        }
-        catch(error){
-            console.log(error);
-            switch( error ){
-                case 'Mail already exists.':
-                    //console.log("Szach mat zły mail.");
-                    u.mail = '';
-                    res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Email already exists.',register:u});
-                    break;
-                case 'Nickname already exists.':
-                    u.nickname = '';
-                    res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Nickname already exists.',register:u});
-                    break;
-                default:
-                    res.render('login.ejs',{returnUrl:req.query.returnUrl,register:u});
-                    //res.render('error.js',{})
-                    break;
+    try{
+        if(req.body.registerBtn){
+            console.log("Register");
+            //var password = await bcrypt.hash(req.body.passwordRegister, 12 );
+            var u = {
+                mail:req.body.emailRegister,
+                nickname:req.body.nicknameRegister,
+                name:req.body.nameRegister,
+                surname:req.body.surnameRegister,
+                password:req.body.passwordRegister,
+                role:'client'
+            };
+            var udb = Object.assign({},u);
+            udb.password = await bcrypt.hash(u.password, 12 );
+            try{
+                await db.insertUser(udb);
+                res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Register completed. You can now log in.',register:emptyregister});
             }
-        }
-        //res.redirect('/login?returnUrl='+req.url);
-    }
-    else{
-        var email = req.body.email;
-        var pswd = req.body.password;
-
-        var check = (await db.getPasswordByMail(email))[0];
-        // console.log(pswd + ' ' + check.password);
-        if(check){
-            var result = await bcrypt.compare(pswd,check.password);
-            if( result ){
-                res.cookie('user',check.id,{signed:true});
-                res.cookie('role',check.role,{signed:true});
-                if(req.query.returnUrl){
-                    res.redirect(req.query.returnUrl);
+            catch(error){
+                console.log(error);
+                switch( error ){
+                    case 'Mail already exists.':
+                        //console.log("Szach mat zły mail.");
+                        u.mail = '';
+                        res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Email already exists.',register:u});
+                        break;
+                    case 'Nickname already exists.':
+                        u.nickname = '';
+                        res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Nickname already exists.',register:u});
+                        break;
+                    default:
+                        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+                        break;
                 }
-                else{
-                    res.redirect('/');
-                }
-            }
-            else{
-                console.log("Wrong password");
-                res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong password.',register:emptyregister});
             }
         }
         else{
-            console.log("No user in db.");
-            res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong mail.',register:emptyregister});
+            var email = req.body.email;
+            var pswd = req.body.password;
+
+            try{
+                var check = (await db.getPasswordByMail(email))[0];
+            }
+            catch(error) {
+                res.render('error.ejs', { error : {id: 1, description: error}});
+                console.log(error);
+                res.end();
+                return;
+            }
+
+            if(check){
+                var result = await bcrypt.compare(pswd,check.password);
+                if( result ){
+                    res.cookie('user',check.id,{signed:true});
+                    res.cookie('role',check.role,{signed:true});
+                    if(req.query.returnUrl){
+                        res.redirect(req.query.returnUrl);
+                    }
+                    else{
+                        res.redirect('/');
+                    }
+                }
+                else{
+                    console.log("Wrong password");
+                    res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong password.',register:emptyregister});
+                }
+            }
+            else{
+                console.log("No user in db.");
+                res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong mail.',register:emptyregister});
+            }
         }
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
     }
 });
 
 app.get('/cart',authorize('client'), async (req,res) => {
-    var cart = {};
-    var products = [];
-    var total_cost = 0;
-    if(req.session.cart){
-        var productsid = JSON.parse(req.session.cart);
-        for ( const p of Object.keys(productsid)) {
-            console.log(p);
-            var book = await db.getProductDetailsDescriptive(parseInt(p));
-            products.push({
-                quantity : productsid[p],
-                book : {
-                    id : book.id,
-                    title : book.title,
-                    author: book.author,
-                    price: book.price
-                }
-            });
-            total_cost += book.price*parseInt(p);
-        };
-    }
-    cart.total_cost = total_cost;
-    cart.products = products;
-    res.render('cart.ejs', { order : cart });
-});
-
-app.post('/register',async (req,res) =>{
-    var u = {
-        mail:req.body.emailRegister,
-        nickname:req.body.nicknameRegister,
-        name:req.body.nameRegister,
-        surname:req.body.surnameRegister,
-        password:req.body.passwordRegister,
-        role:'client'
-    };
     try{
-        await db.insertUser(u);
-        res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Register completed. You can now log in.',register:emptyregister});
-    }
-    catch(error){
-        console.log("Some error");
-        switch( error ){
-            case 'Mail already exists.':
-                console.log("Szach mat zły mail.");
-                break;
-            case 'Nickname already exists.':
-                console.log("Wymyśl cos orginalnego");
-                break;
-            default:
-                console.log(error);
-                break;
+        var cart = {};
+        var products = [];
+        var total_cost = 0;
+        if(req.session.cart){
+            var productsid = JSON.parse(req.session.cart);
+            for ( const p of Object.keys(productsid)) {
+                console.log(p);
+
+                try{
+                    var book = await db.getProductDetailsDescriptive(parseInt(p));
+                }
+                catch(error) {
+                    res.render('error.ejs', { error : {id: 1, description: error}});
+                    console.log(error);
+                    res.end();
+                    return;
+                }
+
+                products.push({
+                    quantity : productsid[p],
+                    book : {
+                        id : book.id,
+                        title : book.title,
+                        author: book.author,
+                        price: book.price
+                    }
+                });
+                total_cost += book.price*parseInt(p);
+            };
         }
-        res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Nickname already exists.',register:u});
+        cart.total_cost = total_cost;
+        cart.products = products;
+        res.render('cart.ejs', { order : cart });
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
     }
-    //res.redirect('/login?returnUrl='+req.url);
 });
 
-app.get('/userslist',async (req,res) => {
-    var users = await db.getUsers();
-    console.log(users[0]);
-    res.render('users.ejs',{users:users});
+app.post('/cart', async(req,res) => {
+    try {
+        if(req.session.cart){
+            var order = {
+                user_id : req.signedCookies.user,
+                address : req.body.address,
+                postal_code : req.body.postalCode,
+                city : req.body.city,
+                finished : false
+            };
+            var products = [];
+            var productsid = JSON.parse(req.session.cart);
+            for ( const p of Object.keys(productsid)) {
+                products.push([p,productsid[p]]);
+            }
+            order.product_list = products;
+            try{
+                await db.insertOrder(order);
+                res.end("Ordered");
+            }
+            catch(error) {
+                res.render('error.ejs', { error : {id: 1, description: error}});
+                console.log(error);
+                res.end();
+                return;
+
+            }
+        }
+        else{
+            res.render('error.ejs', { error : {id: 4, description: "Cart is empty"}});
+        }
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
+
+app.get('/users',async (req,res) => {
+    try{
+        try{
+            var users = await db.getUsers();
+        }
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
+        }
+        
+        res.render('users.ejs',{users:users});
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
+
+
+app.get('/orders',async (req,res) => {
+    try{
+        try{
+            var orders = await db.getOrders();
+        }
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
+        }
+        
+        res.render('orders.ejs',{orders:orders});
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
 });
 
 //user1 : 'abc'
@@ -423,8 +507,8 @@ function authorize(permissions) {
                 }
                 else{
                     console.log(`As ${user.role} you have no acces to requested page.`);
-                    res.redirect('/login?returnUrl='+req.url);
-                    //res.render('login.ejs',{returnUrl:req.query.returnUrl,message:`As ${user.role} you have no acces to requested page.`,register:emptyregister});
+                    res.render('error.ejs', { error : {id: 2, description: (`As ${user.role} you have no acces to requested page.`)}});
+                    res.end();
                 }
             }
             catch (error) {
@@ -440,20 +524,25 @@ function authorize(permissions) {
 }
 
 app.post('/tocart',(req,res) => {
-    var newProduct = req.body.cartBtn;
-    if(newProduct){
-        var cart = {};
-        if (req.session.cart){
-            cart = JSON.parse(req.session.cart);
+    try{
+        var newProduct = req.body.cartBtn;
+        if(newProduct){
+            var cart = {};
+            if (req.session.cart){
+                cart = JSON.parse(req.session.cart);
+            }
+            if (!cart[newProduct]) {
+                cart[newProduct] = 0;
+            }
+            cart[newProduct] += 1;
+            console.log(cart);
+            req.session.cart = JSON.stringify(cart);
         }
-        if (!cart[newProduct]) {
-            cart[newProduct] = 0;
-        }
-        cart[newProduct] += 1;
-        console.log(cart);
-        req.session.cart = JSON.stringify(cart);
+        res.redirect(`/?type=${req.query.searchtype}&searchbar=${req.query.searchbar}`);
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
     }
-    res.redirect(`/?type=${req.query.searchtype}&searchbar=${req.query.searchbar}`);
 });
 
 http.createServer(app).listen(3000);
