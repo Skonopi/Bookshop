@@ -313,13 +313,6 @@ class ShopRepository {
   }
 }
 
-// var pool = new pg.Pool({
-//   host: 'localhost',
-//   database: 'shop',
-//   user: 'app',
-//   password: 'password'
-// })
-
 const pool = new pg.Client({
   connectionString: process.env.DATABASE_URL,
   ssl: {
