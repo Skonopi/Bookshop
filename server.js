@@ -21,28 +21,12 @@ app.use(express.urlencoded({extended:true}));
 app.use(express.static('public'));
 app.use(session({resave:true, saveUninitialized:true, secret:'qvfgsdfgtshgnhmesatuk'}));
 
+
 app.engine('html',ejs.renderFile);
 
 var emptyregister =  {'email':'','nickname':'','name':'','surname':'','password':''};
 
-/*app.post('/productAdded',upload.single(),(req,res) => {
-    var newProduct = req.body.newProduct;
-    if(newProduct){
-        var cart = {};
-        console.log(req.session.cart);
-        if (req.session.cart){
-            cart = JSON.parse(req.session.cart);
-        }
-        if (!cart[newProduct]) {
-            cart[newProduct] = 0;
-        }
-        cart[newProduct] += 1;
-        console.log(cart);
-        req.session.cart = JSON.stringify(cart);
-    }
-});*/
-
-app.get('/', async (req,res) => {
+app.get('/', async(req,res) => {
     try {
         db.getMatchingProducts({description:'ad'});
         console.log("GET index");
@@ -248,19 +232,19 @@ app.get('/book',async (req,res) => {
             return;
         }
         console.log(book);
-        res.render('book.ejs', { 'book':book[0], 'searchbar': '', 'searchtype': 'title'});
+        res.render('book.ejs', { 'book':book[0], 'searchbar': '', 'searchtype': 'Title'});
     } catch (error) {
         console.log(error);
         res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
     }
 });
 
-app.get('/bookedit',async (req,res) => {
+app.get('/bookedit', authorize('admin'), async (req,res) => {
     try {
         console.log("GET book");
-        var bookid = req.query.id;
+        var bookid = parseInt(req.query.id);
         try{
-            var book = await db.getProductDetailsDescriptive(parseInt(bookid));
+            var book = await db.getProductDetailsDescriptive(bookid);
         }
         catch(error) {
             res.render('error.ejs', { error : {id: 1, description: error}});
@@ -268,7 +252,87 @@ app.get('/bookedit',async (req,res) => {
             res.end();
             return;
         }
-        res.render('book_admin.ejs', { 'book':book[0], 'searchbar': '', 'searchtype': 'title'});
+        res.render('book_admin.ejs', { 'book':book[0], 'searchbar': '', 'searchtype': 'Title'});
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
+
+app.post('/bookedit', async (req,res) => {
+    try {
+        console.log("POST book edit");
+        var bookid = parseInt(req.query.id);
+        var book = {
+            title : req.body.title,
+            author : req.body.author,
+            genre : req.body.genre,
+            publisher : req.body.publisher,
+            publication_year : req.body.publicationYear,
+            description : req.body.description
+        };
+        try{
+            if(bookid==null){
+                bookid = await db.insertProduct(book);
+            }
+            else{
+                await db.updateProduct(bookid,book);
+            }
+        }
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
+        }
+        res.render('book_admin.ejs', { 'book':book, 'searchbar': '', 'searchtype': 'title'});
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
+
+app.post('/deletebook', async (req,res) => {
+    try {
+        console.log("POST delete book");
+        var bookid = parseInt(req.query.id);
+        try{
+            await db.deleteProduct(bookid);
+        }
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
+        }
+        res.redirect('/');
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
+
+app.post('/addbook', async (req,res) => {
+    try {
+        console.log("POST add book");
+        var book = {
+            title : req.body.title,
+            author : req.body.author,
+            genre : req.body.genre,
+            publisher : req.body.publisher,
+            publication_year : req.body.publicationYear,
+            description : req.body.description
+        };
+        try{
+            var bookid = await db.insertProduct(book);
+        }
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
+        }
+        res.render('book_admin.ejs', { 'book':book, 'searchbar': '', 'searchtype': 'title'});
     } catch (error) {
         console.log(error);
         res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
@@ -441,7 +505,7 @@ app.post('/cart', async(req,res) => {
     }
 });
 
-app.get('/users',async (req,res) => {
+app.get('/users', authorize('admin'), async (req,res) => {
     try{
         try{
             var users = await db.getUsers();
@@ -480,6 +544,7 @@ app.get('/orders',async (req,res) => {
     }
 });
 
+
 //user1 : 'abc'
 //user2: '123'
 //user3: 'abc123'
@@ -492,9 +557,6 @@ async function f(password) {
     var result = await bcrypt.compare( 'abc', '$2b$12$WqnY9kq3nbcoeyLsZ3WpS.N7u8nGG1y4s4eUu6nfSQzhyL7oiBXOi' );
     //console.log(result);
 }
-//f('123');
-//f('abc123');
-
 
 function authorize(permissions) {
     return async (req,res,next) => {
