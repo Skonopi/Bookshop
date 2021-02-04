@@ -71,10 +71,19 @@
           <div class="mb-3">
             <label for="inputPublicationYear">Publication year:</label>
             <% if(book !==null) {value="value = " + book.publication_year; } %>
-              <input class="form-control" type="text" id="inputPublicationYear" name="publicationYear" <%=value%>
+              <input class="form-control" type="number" id="inputPublicationYear" name="publicationYear" <%=value%>
               required>
               <div class="invalid-feedback">
                 Publication year required.
+              </div>
+          </div>
+          <div class="mb-3">
+            <label for="inputPrice">Price:</label>
+            <% if(book !==null) {value="value = " + book.price; } %>
+              <input class="form-control" type="number" id="inputPrice" name="price" min="0.01" <%=value%>
+              required>
+              <div class="invalid-feedback">
+                Price required.
               </div>
           </div>
           <div class="mb-3">
