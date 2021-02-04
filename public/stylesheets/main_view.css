@@ -13,3 +13,15 @@ body > .container {
 div.message{
   font-size: x-large;
 }
+.admin-only{
+  display: none;
+}
+.client-only{
+  display: none;
+}
+.logged-in{
+  display: none;
+}
+.anonymous-only{
+  display: initial;
+}
