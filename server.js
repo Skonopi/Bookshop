@@ -9,7 +9,17 @@ const multer = require('multer');
 const  db = require('./database');
 
 var app = express();
-var upload = multer({dest: 'images/'});
+// var upload = multer({dest: 'images/'});
+
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'images')
+    },
+    // filename: function (req, file, cb) {
+    //   cb(null, file.fieldname + '-' + Date.now())
+    // }
+  });
+var upload = multer({ storage: storage });
 
 app.set('views','./views');
 app.set('view engine','ejs');
@@ -266,7 +276,7 @@ app.get('/bookedit', authorize('admin'), async (req,res) => {
     }
 });
 
-app.post('/bookedit', upload.single("avatar"), async (req,res) => {
+app.post('/bookedit', upload.single("coverFile"), async (req,res) => {
     try {
         console.log("POST book edit");
         var bookid = parseInt(req.query.id);
@@ -279,6 +289,7 @@ app.post('/bookedit', upload.single("avatar"), async (req,res) => {
             description : req.body.description
         };
         console.log(req.file);
+        console.log(req.body);
         try{
             if(Number.isNaN(bookid)){
                 console.log("ADD");
