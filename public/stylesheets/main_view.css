@@ -10,18 +10,24 @@ body > .container {
 .pagination {
     padding-top: 20px;
 }
+nav > .navbar {
+  flex-wrap: nowrap;
+}
 div.message{
   font-size: x-large;
 }
 .admin-only{
-  display: none;
+  /* display: none; */
 }
 .client-only{
-  display: none;
-}
-.logged-in{
-  display: none;
+  /* display: none; */
 }
 .anonymous-only{
-  display: initial;
+  /* display: initial; */
+}
+.logged-in{
+  /* display: none; */
+}
+.non-admin{
+
 }
