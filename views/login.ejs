@@ -13,7 +13,7 @@
   <title>Hello, world!</title>
 </head>
 
-<body class="text-center h-100" onload='handleError("<%=locals.message%>")'>
+<body class="text-center h-100" onload='onLoad("<%=locals.message%>", "<%=popoutMessage%>")'>
   <div class="container h-100">
     <div class="row h-100 align-items-center">
       <div class="col pe-4 justify-content-end">
@@ -97,7 +97,20 @@
     </div>
 
   </div>
+<script>
+  function onLoad(message, popoutMessage){
+    handleError(message);
 
+  }
+</script>
+<script>
+  function popout(popoutMessage){
+    if(popoutMessage == 'register')
+    {
+      window.alert('Registration successful!')
+    }
+  }
+</script>
   <script>
     function handleError(message) {
       var loginForm = document.getElementById("loginForm");

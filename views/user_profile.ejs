@@ -13,7 +13,7 @@
 
 </head>
 
-<body >
+<body>
     <header>
         <nav class="navbar navbar-dark bg-dark fixed-top">
             <div class="container-sm d-flex">
@@ -22,33 +22,50 @@
         </nav>
     </header>
     <main class="container">
-        <form action="POST">
+        <form method="POST">
             <div class="row">
 
                 <div class="col mb-3">
-                    <label for="filterEmail">Email:</label>
-                    <input class="form-control" type="text" id="filterEmail" name="email" value="<%=user.mail%>" placeholder="Email">
+                    <label for="email">Email:</label>
+                    <input class="form-control" type="text" id="email" name="email" value="<%=user.mail%>"
+                        placeholder="Email">
                 </div>
                 <div class="col mb-3">
-                    <label for="filterNickname">Nickname:</label>
-                    <input class="form-control" type="text" id="filterNickname" name="nickname" value="<%=user.nickname%>"
-                        placeholder="Nickname">
+                    <label for="nickname">Nickname:</label>
+                    <input class="form-control" type="text" id="nickname" name="nickname"
+                        value="<%=user.nickname%>" placeholder="Nickname">
                 </div>
             </div>
             <div class="row">
-                <div class="col mb-3"> <label for="filterName">Name:</label>
-                    <input class="form-control" type="text" id="filterName" name="name" value="<%=user.name%>" placeholder="Name">
+                <div class="col mb-3"> <label for="name">Name:</label>
+                    <input class="form-control" type="text" id="name" name="name" value="<%=user.name%>"
+                        placeholder="Name">
                 </div>
                 <div class="col mb-3">
-                    <label for="filterSurname">Surname:</label>
-                    <input class="form-control" type="text" id="filterSurname" name="surname" value="<%=user.surname%>"
+                    <label for="surname">Surname:</label>
+                    <input class="form-control" type="text" id="surname" name="surname" value="<%=user.surname%>"
                         placeholder="Surname">
                 </div>
             </div>
             <div class="mb-3">
-                <label for="filterDate">Registered since:</label>
-                <span name="filterDate"><%=user.creation_date%></span>
+                <button class="btn btn-dark" type="sumbit">Change account data</button>
             </div>
+            <div class="mb-3">
+                <label for="date">Registered since:</label>
+                <span name="date">
+                    <%=user.creation_date%>
+                </span>
+            </div>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="password">Password</label>
+                    <input class="form-control" type="text" id="password" name="password">
+                </div>
+                <div>
+                    <button class="btn btn-dark" type="sumbit">Change password</button>
+                </div>
+            </form>
+
         </form>
     </main>
 
