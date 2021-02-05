@@ -586,6 +586,8 @@ app.get('/orders',authorize('admin','client'),async (req,res) => {
     }
 });
 
+app.post('/orders',)
+
 app.get('/profile',authorize('admin','client'),async (req,res) => {
     try{
         try{
