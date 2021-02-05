@@ -77,6 +77,39 @@
     integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
     crossorigin="anonymous"></script>
   <script src="scripts/toggleViewRolebased.js"></script>
+  <script>
+    (function keepFilters(){
+      var order_id = document.getElementById('orderId');
+      var user_id = document.getElementById('userId');
+      var status = document.getElementById('status');
+      var date = document.getElementById('date');
+
+      order_id.addEventListener('change', function(){
+        sessionStorage.setItem('order_id_autosave', order_id.value);
+      });
+      user_id.addEventListener('change', function(){
+        sessionStorage.setItem('user_id_autosave', user_id.value);
+      });
+      status.addEventListener('change', function(){
+        sessionStorage.setItem('status_autosave', status.value);
+      });
+      date.addEventListener('change', function(){
+        sessionStorage.setItem('date_autosave', date.value);
+      });
+      if(sessionStorage.getItem('order_id_autosave')){
+        order_id.value = sessionStorage.getItem('order_id_autosave');
+      }
+      if(sessionStorage.getItem('user_id_autosave')){
+        order_id.value = sessionStorage.getItem('user_id_autosave');
+      }
+      if(sessionStorage.getItem('status_autosave')){
+        order_id.value = sessionStorage.getItem('status_autosave');
+      }
+      if(sessionStorage.getItem('date_autosave')){
+        order_id.value = sessionStorage.getItem('date_autosave');
+      }
+    })();
+  </script>
 </body>
 
 </html>
