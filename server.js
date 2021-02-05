@@ -248,7 +248,7 @@ app.get('/book',async (req,res) => {
     }
 });
 
-app.get('/bookedit', authorize('admin'), async (req,res) => {
+app.get('/bookedit', authorize(false,'admin'), async (req,res) => {
     try {
         console.log("GET book");
         var bookid = parseInt(req.query.id);
@@ -368,7 +368,8 @@ app.get('/login',(req,res) => {
     } catch (error) {
         console.log(error);
         res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
-    }});
+}});
+
 app.post('/login',async (req,res) => {
     console.log('POST login');
     try{
@@ -387,7 +388,7 @@ app.post('/login',async (req,res) => {
             udb.password = await bcrypt.hash(u.password, 12 );
             try{
                 await db.insertUser(udb);
-                res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Register completed. You can now log in.',register:emptyregister});
+                res.render('login.ejs',{returnUrl:req.query.returnUrl,popup:'Register completed. You can now log in.',register:emptyregister});
             }
             catch(error){
                 console.log(error);
@@ -424,8 +425,8 @@ app.post('/login',async (req,res) => {
                 var result = await bcrypt.compare(pswd,check.password);
                 if( result ){
                     req.session.destroy(null);
-                    res.cookie('user',check.id,{signed:true});
-                    res.cookie('role',check.role,{signed:true});
+                    res.cookie('user',check.id,{signed:true,httpOnly:true});
+                    res.cookie('role',check.role,{signed:true,httpOnly:true});
                     if(req.query.returnUrl){
                         res.redirect(req.query.returnUrl);
                     }
@@ -451,9 +452,13 @@ app.post('/login',async (req,res) => {
 
 app.post('/logout',async(req,res) => {
     try {
+        console.log("POST logout");
         req.session.destroy(null);
         Object.keys(req.cookies).forEach( c => {
-            res.cookie.set(c,{maxAge:-1});
+            res.cookie(c,'',{maxAge:-1});
+        });
+        Object.keys(req.signedCookies).forEach( c => {
+            res.cookie(c,'',{maxAge:-1});
         });
         res.redirect('/');
     } catch (error) {
@@ -462,7 +467,7 @@ app.post('/logout',async(req,res) => {
     }
 });
 
-app.get('/cart',authorize('client'), async (req,res) => {
+app.get('/cart',authorize(false,'client'), async (req,res) => {
     try{
         var cart = {};
         var products = [];
@@ -473,7 +478,7 @@ app.get('/cart',authorize('client'), async (req,res) => {
                 console.log(p);
 
                 try{
-                    var book = await db.getProductDetailsDescriptive(parseInt(p));
+                    var book = (await db.getProductDetailsDescriptive(parseInt(p)))[0];
                 }
                 catch(error) {
                     res.render('error.ejs', { error : {id: 1, description: error}});
@@ -488,14 +493,16 @@ app.get('/cart',authorize('client'), async (req,res) => {
                         id : book.id,
                         title : book.title,
                         author: book.author,
-                        price: book.price
+                        price: book.price,
+                        image_path : book.image_path
                     }
                 });
-                total_cost += book.price*parseInt(p);
+                total_cost += book.price*parseInt(productsid[p]);
             };
         }
         cart.total_cost = total_cost;
         cart.products = products;
+        console.log(cart);
         res.render('cart.ejs', { order : cart });
     } catch (error) {
         console.log(error);
@@ -540,7 +547,7 @@ app.post('/cart', async(req,res) => {
     }
 });
 
-app.get('/users', authorize('admin'), async (req,res) => {
+app.get('/users', authorize(false,'admin'), async (req,res) => {
     try{
         try{
             var users = await db.getUsers();
@@ -562,7 +569,7 @@ app.get('/users', authorize('admin'), async (req,res) => {
 });
 
 
-app.get('/orders',authorize('admin','client'),async (req,res) => {
+app.get('/orders',authorize(false,'admin','client'),async (req,res) => {
     try{
         try{
             if(req.signedCookies.role=='admin'){
@@ -586,9 +593,28 @@ app.get('/orders',authorize('admin','client'),async (req,res) => {
     }
 });
 
-app.post('/orders',)
+app.get('/order',async (req,res) => {
+    try {
+        console.log("GET order");
+        var orderid = parseInt(req.query.id);
+        try{
+            var order = (await db.getMatchingOrders({id:[orderid]}))[0];
+        }
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
+        }
+        console.log(book);
+        res.render('book.ejs', { 'book':book, 'searchbar': '', 'searchtype': 'Title'});
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
 
-app.get('/profile',authorize('admin','client'),async (req,res) => {
+app.get('/profile',authorize(false,'admin','client'),async (req,res) => {
     try{
         try{
             var user = (await db.getUserById(req.signedCookies.user))[0];
@@ -642,7 +668,7 @@ async function f(password) {
     //console.log(result);
 }
 
-function authorize(...args) {
+function authorize(returnToMain,...args) {
     return async (req,res,next) => {
         if (req.signedCookies.user) {
             try{
@@ -658,18 +684,24 @@ function authorize(...args) {
                 }
             }
             catch (error) {
-                console.log("Error while reading database");
+                res.render('error.ejs', { error : {id: 1, description: error}});
                 console.log(error);
-                res.redirect('/login?returnUrl='+req.url);
+                res.end();
+                return;
             }
         }
         else{
-            res.redirect('/login?returnUrl='+req.url);
+            if(!returnToMain){
+                res.redirect('/login?returnUrl='+req.url);
+            }
+            else{
+                res.redirect('/login?returnUrl=/');
+            }
         }
     }
 }
 
-app.post('/tocart',(req,res) => {
+app.post('/tocart',authorize(true,'client'),(req,res) => {
     try{
         var newProduct = req.body.cartBtn;
         if(newProduct){
