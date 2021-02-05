@@ -5,26 +5,25 @@ const ejs = require('ejs');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
+const fs = require('fs');
 
 const  db = require('./database');
+const { rename } = require('fs');
 
 var app = express();
 // var upload = multer({dest: 'images/'});
 
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, 'images')
+      cb(null, 'public/images')
     },
-    // filename: function (req, file, cb) {
-    //   cb(null, file.fieldname + '-' + Date.now())
-    // }
   });
 var upload = multer({ storage: storage });
 
 app.set('views','./views');
 app.set('view engine','ejs');
 
-//app.disable('etag');
+app.disable('etag');
 
 app.use(cookieParser('hje5q46qzdc5712323564gfdght6y6'));
 app.use(express.urlencoded({extended:true}));
@@ -288,18 +287,18 @@ app.post('/bookedit', upload.single("coverFile"), async (req,res) => {
             publication_year : parseInt(req.body.publicationYear),
             description : req.body.description
         };
-        console.log(req.file);
-        console.log(req.body);
+
         try{
             if(Number.isNaN(bookid)){
-                console.log("ADD");
-                console.log(book);
                 bookid = await db.insertProduct(book);
             }
             else{
-                console.log("UPADATE");
-                console.log(book);
                 await db.updateProduct(bookid,book);
+            }
+            if(req.file){
+                fs.rename(req.file.path,(req.file.destination+'/book'+bookid+'.jpeg'),err => console.log(err));
+                await db.updateProduct(bookid,{image_path : './images/book'+bookid+'.jpeg'});
+                //await db.updateProduct(bookid,{image_path : './' + req.file.path});
             }
         }
         catch(error) {
@@ -394,7 +393,6 @@ app.post('/login',async (req,res) => {
                 console.log(error);
                 switch( error ){
                     case 'Mail already exists.':
-                        //console.log("Szach mat zły mail.");
                         u.mail = '';
                         res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Email already exists.',register:u});
                         break;
@@ -425,6 +423,7 @@ app.post('/login',async (req,res) => {
             if(check){
                 var result = await bcrypt.compare(pswd,check.password);
                 if( result ){
+                    req.session.destroy(null);
                     res.cookie('user',check.id,{signed:true});
                     res.cookie('role',check.role,{signed:true});
                     if(req.query.returnUrl){
@@ -444,6 +443,19 @@ app.post('/login',async (req,res) => {
                 res.render('login.ejs',{returnUrl:req.query.returnUrl,message:'Wrong mail.',register:emptyregister});
             }
         }
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
+
+app.post('/logout',async(req,res) => {
+    try {
+        req.session.destroy(null);
+        Object.keys(req.cookies).forEach( c => {
+            res.cookie.set(c,{maxAge:-1});
+        });
+        res.redirect('/');
     } catch (error) {
         console.log(error);
         res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
@@ -509,14 +521,14 @@ app.post('/cart', async(req,res) => {
             order.product_list = products;
             try{
                 await db.insertOrder(order);
-                res.end("Ordered");
+                req.session.destroy(null);
+                res.render('message.ejs',{message:"Your order has been register"});
             }
             catch(error) {
                 res.render('error.ejs', { error : {id: 1, description: error}});
                 console.log(error);
                 res.end();
                 return;
-
             }
         }
         else{
@@ -539,6 +551,8 @@ app.get('/users', authorize('admin'), async (req,res) => {
             res.end();
             return;
         }
+
+        Object.keys(users).forEach( u => {u.password = null;});
         
         res.render('users.ejs',{users:users});
     } catch (error) {
@@ -548,10 +562,15 @@ app.get('/users', authorize('admin'), async (req,res) => {
 });
 
 
-app.get('/orders',async (req,res) => {
+app.get('/orders',authorize('admin','client'),async (req,res) => {
     try{
         try{
-            var orders = await db.getOrders();
+            if(req.signedCookies.role=='admin'){
+                var orders = await db.getOrders();
+            }
+            else{
+                var orders = await db.getMatchingOrders({user_id:[req.signedCookies.user]});
+            }
         }
         catch(error) {
             res.render('error.ejs', { error : {id: 1, description: error}});
@@ -560,13 +579,53 @@ app.get('/orders',async (req,res) => {
             return;
         }
         
-        res.render('orders.ejs',{orders:orders});
+        res.render('orders.ejs',{orders:orders,role:req.signedCookies.role});
     } catch (error) {
         console.log(error);
         res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
     }
 });
 
+app.get('/profile',authorize('admin','client'),async (req,res) => {
+    try{
+        try{
+            var user = (await db.getUserById(req.signedCookies.user))[0];
+        }
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
+        }
+        
+        res.render('user_profile.ejs',{user:user});
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
+
+app.post('/profile', async(req,res) => {
+    try {
+        var user = {
+            mail : req.body.email,
+            nickname : req.body.nickname,
+            name : req.body.name,
+            surname : req.body.surname
+        };
+        try{
+            await db.updateUser(user);
+        }catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
+        }
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
 
 //user1 : 'abc'
 //user2: '123'
@@ -581,12 +640,12 @@ async function f(password) {
     //console.log(result);
 }
 
-function authorize(permissions) {
+function authorize(...args) {
     return async (req,res,next) => {
         if (req.signedCookies.user) {
             try{
                 var user = (await db.getUserById(req.signedCookies.user))[0];
-                if( user.role == permissions ){
+                if( args.includes(user.role) ){
                     console.log("Logged ->redirect");
                     next();
                 }
