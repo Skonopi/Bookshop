@@ -83,7 +83,10 @@
                                 <%=users[i].creation_date%>
                             </td>
                             <td>
-                                <a href="">Delete</a>
+                                <!-- <a href="">Delete</a> -->
+                                <form method="POST" action="/deleteuser">
+                                    <button class="btn btn-dark" type="submit">Delete</button>
+                                </form>
                             </td>
                         </tr>
                         <%}%>
