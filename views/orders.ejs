@@ -67,7 +67,7 @@
             <%if(orders[i].finished){%> Completed <%}else{%> In progress <%}%>
           </td>
           <td>
-            <a href="\orderdetails">Details</a>
+            <a href="/order?id=<%=orders[i].id%>">Details</a>
           </td>
         </tr>
         <%}%>

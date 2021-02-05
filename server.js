@@ -388,7 +388,7 @@ app.post('/login',async (req,res) => {
             udb.password = await bcrypt.hash(u.password, 12 );
             try{
                 await db.insertUser(udb);
-                res.render('login.ejs',{returnUrl:req.query.returnUrl,popup:'Register completed. You can now log in.',register:emptyregister});
+                res.render('login.ejs',{returnUrl:req.query.returnUrl,popoutMessage:'Register completed. You can now log in.',register:emptyregister});
             }
             catch(error){
                 console.log(error);
@@ -475,7 +475,7 @@ app.get('/cart',authorize(false,'client'), async (req,res) => {
         if(req.session.cart){
             var productsid = JSON.parse(req.session.cart);
             for ( const p of Object.keys(productsid)) {
-                console.log(p);
+                //console.log(p);
 
                 try{
                     var book = (await db.getProductDetailsDescriptive(parseInt(p)))[0];
@@ -498,7 +498,7 @@ app.get('/cart',authorize(false,'client'), async (req,res) => {
                     }
                 });
                 total_cost += book.price*parseInt(productsid[p]);
-            };
+            }
         }
         cart.total_cost = total_cost;
         cart.products = products;
@@ -568,6 +568,26 @@ app.get('/users', authorize(false,'admin'), async (req,res) => {
     }
 });
 
+app.post('/deleteuser', async (req,res) => {
+    try {
+        console.log("POST delete user");
+        var userid = parseInt(req.query.id);
+        try{
+            await db.deleteUser(userid);
+        }
+        catch(error) {
+            res.render('error.ejs', { error : {id: 1, description: error}});
+            console.log(error);
+            res.end();
+            return;
+        }
+        res.redirect('/users');
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
+
 
 app.get('/orders',authorize(false,'admin','client'),async (req,res) => {
     try{
@@ -599,6 +619,26 @@ app.get('/order',async (req,res) => {
         var orderid = parseInt(req.query.id);
         try{
             var order = (await db.getMatchingOrders({id:[orderid]}))[0];
+            var products = [];
+            var total_cost=0;
+            console.log(order);
+            for ( const [p,n] of order.product_list) {
+                var book = (await db.getProductDetailsDescriptive(p))[0];
+
+                products.push({
+                    quantity : n,
+                    book : {
+                        id : book.id,
+                        title : book.title,
+                        author: book.author,
+                        price: book.price,
+                        image_path : book.image_path
+                    }
+                });
+                total_cost += book.price*n;
+            }
+            order.products = products;
+            order.total_cost = total_cost;
         }
         catch(error) {
             res.render('error.ejs', { error : {id: 1, description: error}});
@@ -606,8 +646,7 @@ app.get('/order',async (req,res) => {
             res.end();
             return;
         }
-        console.log(book);
-        res.render('book.ejs', { 'book':book, 'searchbar': '', 'searchtype': 'Title'});
+        res.render('order.ejs', { 'order':order });
     } catch (error) {
         console.log(error);
         res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
