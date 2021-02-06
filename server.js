@@ -652,6 +652,14 @@ app.post('/orders',(req,res) => {
         if(req.body.date){
             order.date = [req.body.date,req.body.date];
         }
+        if(req.body.date){
+            if(req.body.date == 'Completed'){
+                order.status = [true];
+            }
+            if(req.body.date == 'In progress'){
+                order.status = [false];
+            }
+        }
         //console.log(order);
         req.session.ordersFiltr = JSON.stringify(order);
     }
@@ -800,7 +808,12 @@ app.post('/tocart',authorize(true,'client'),(req,res) => {
             console.log(cart);
             req.session.cart = JSON.stringify(cart);
         }
-        res.redirect(`/?type=${req.query.searchtype}&searchbar=${req.query.searchbar}`);
+        if(req.query.searchbar){
+            res.redirect(`/?type=${req.query.searchtype}&searchbar=${req.query.searchbar}`);
+        }
+        else{
+            res.redirect('/');
+        }
     } catch (error) {
         console.log(error);
         res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});

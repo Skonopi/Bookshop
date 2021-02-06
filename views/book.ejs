@@ -55,7 +55,9 @@
           <h5 class="text-dark">
             <%=book.price%>$
           </h5>
-          <button class="btn btn-dark" id="book-<%=book.id%>">Add to cart</button>
+          <form method="POST" action="\tocart">
+            <button type="submit" class="btn btn-dark" id="book-<%=book.id%>" name="cartBtn" value="<%=book.id%>">Add to cart</button>
+          </form>
         </div>
       </div>
       <div class="row">
