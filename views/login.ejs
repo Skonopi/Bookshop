@@ -100,14 +100,16 @@
 <script>
   function onLoad(message, popoutMessage){
     handleError(message);
+    popout(popoutMessage);
 
   }
 </script>
 <script>
   function popout(popoutMessage){
-    if(popoutMessage == 'register')
+    console.log(popoutMessage);
+    if(popoutMessage)
     {
-      window.alert('Registration successful!')
+      window.alert(popoutMessage);
     }
   }
 </script>
