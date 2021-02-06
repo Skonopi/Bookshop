@@ -549,6 +549,24 @@ app.post('/cart', async(req,res) => {
 
 app.get('/users', authorize(false,'admin'), async (req,res) => {
     try{
+        var user ={};
+        if(req.body.filterEmail){
+            user.mail = req.body.filterEmail;
+        }
+        if(req.body.filterNickname){
+            user.nickname = req.body.filterNickname;
+        }
+        if(req.body.filterName){
+            user.name = req.body.filterName;
+        }
+        if(req.body.filterSurname){
+            user.surname = req.body.filterSurname;
+        }
+        if(req.body.filterDate){
+            user.date = req.body.filterDate;
+        }
+        console.log(user);
+        
         try{
             var users = await db.getUsers();
         }
@@ -593,7 +611,15 @@ app.get('/orders',authorize(false,'admin','client'),async (req,res) => {
     try{
         try{
             if(req.signedCookies.role=='admin'){
-                var orders = await db.getOrders();
+                console.log(req.session);
+                if(req.session.ordersFiltr){
+                    var order = JSON.parse(req.session.ordersFiltr);
+                    console.log(order);
+                    var orders = await db.getMatchingOrders(order);
+                }
+                else{
+                    var orders = await db.getOrders();
+                }
             }
             else{
                 var orders = await db.getMatchingOrders({user_id:[req.signedCookies.user]});
@@ -612,6 +638,25 @@ app.get('/orders',authorize(false,'admin','client'),async (req,res) => {
         res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
     }
 });
+
+app.post('/orders',(req,res) => {
+    if(req.signedCookies.role=='admin'){
+        var order ={};
+        if(req.body.orderId){
+            order.id = [req.body.orderId];
+        }
+        if(req.body.userId){
+            order.user_id = [req.body.userId];
+        }
+        //+1?
+        if(req.body.date){
+            order.date = [req.body.date,req.body.date];
+        }
+        //console.log(order);
+        req.session.ordersFiltr = JSON.stringify(order);
+    }
+    res.redirect('/orders');
+})
 
 app.get('/order',async (req,res) => {
     try {
