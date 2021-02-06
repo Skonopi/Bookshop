@@ -55,8 +55,7 @@
                     </div> -->
                     <div class="mb-3">
                         <label for="inputZipPostalCode">Zip / Postal code:</label>
-                        <input class="form-control" type="text" id="inputZipPostalCode" name="postalCode"
-                            required>
+                        <input class="form-control" type="text" id="inputZipPostalCode" name="postalCode" required>
                         <div class="invalid-feedback">
                             Zip / Postal code required.
                         </div>
@@ -81,14 +80,16 @@
                     <span class="badge bg-secondary rounded-pill">3</span>
                 </div> -->
                 <h3 class="d-flex justify-content-between align-items-center my-3">
-                    <span > Your cart</span>
+                    <span> Your cart</span>
                     <span class="badge bg-dark rounded-pill">
                         <%= order.products.length %> items
                     </span>
                 </h3>
                 <h4 class="d-flex justify-content-between align-items-center my-3">
                     <span class="text-muted">Total (USD):</span>
-                    <span class="fw-bold text-muted"><%=order.total_cost%>$</span>
+                    <span class="fw-bold text-muted">
+                        <%=order.total_cost%>$
+                    </span>
                 </h4>
                 <form>
                     <table class="table table-striped  align-middle table-hover">
@@ -96,7 +97,7 @@
                             <tr>
                                 <th scope="col" class="text-start">Book</th>
                                 <th scope="col">Quantity</th>
-                                <th scope="col">Prize</th>
+                                <th scope="col">Price</th>
                                 <th scope="col">Action</th>
                             </tr>
                         </thead>
@@ -114,10 +115,12 @@
                                             <%=order.products[i].book.author%>
                                         </p>
                                     </th>
-                                    <td><input class="form-control mx-auto" type="number"
-                                            value="<%=order.products[i].quantity%>" /></td>
                                     <td>
-                                        <%=order.products[i].book.prize%>$
+                                        <!-- <input class="form-control mx-auto" type="number" value="<%=order.products[i].quantity%>" /> -->
+                                        <%=order.products[i].quantity%>
+                                    </td>
+                                    <td>
+                                        <%=order.products[i].book.price%>$
                                     </td>
                                     <td><a>Remove</a></td>
                                 </tr>
