@@ -33,12 +33,12 @@
         <% var value="" ; %>
           <div class="mb-3">
             <label for="formFile" class="form-label">Cover image:</label>
-            <input class="form-control" type="file"   id="coverFile" name="coverFile" required>
+            <input class="form-control" type="file"   id="coverFile" name="coverFile"  required>
           </div>
           <div class="mb-3">
             <label for="inputTitle">Title:</label>
             <% if(book !==null) {value="value = " + book.title; } %>
-              <input class="form-control" type="text" id="inputTitle" name="title" <%=value%> required>
+              <input class="form-control" type="text" id="inputTitle" name="title" value="<%= book ? book.title : ''%>" required>
               <div class="invalid-feedback">
                 Title required.
               </div>
@@ -46,7 +46,7 @@
           <div class="mb-3">
             <label for="inputAuthor">Author:</label>
             <% if(book !==null) {value="value = " + book.author; } %>
-              <input class="form-control" type="text" id="inputAuthor" name="author" <%=value%> required>
+              <input class="form-control" type="text" id="inputAuthor" name="author" value="<%= book ? book.author : ''%>" required>
               <div class="invalid-feedback">
                 Author required.
               </div>
@@ -54,7 +54,7 @@
           <div class="mb-3">
             <label for="selectGenre">Genre:</label>
             <% if(book !==null) {value="value = " + book.genre; } %>
-              <input class="form-control" type="text" id="inputGenre" name="genre" <%=value%> required>
+              <input class="form-control" type="text" id="inputGenre" name="genre" value="<%= book ? book.genre : ''%>" required>
               <div class="invalid-feedback">
                 Genre required.
               </div>
@@ -62,7 +62,7 @@
           <div class="mb-3">
             <label for="inputPublisher">Publisher:</label>
             <% if(book !==null) {value="value = " + book.publisher; } %>
-              <input class="form-control" type="text" id="inputPublisher" name="publisher" <%=value%>
+              <input class="form-control" type="text" id="inputPublisher" name="publisher" value="<%= book ? book.publisher : ''%>"
               required>
               <div class="invalid-feedback">
                 Publisher required.
@@ -71,7 +71,7 @@
           <div class="mb-3">
             <label for="inputPublicationYear">Publication year:</label>
             <% if(book !==null) {value="value = " + book.publication_year; } %>
-              <input class="form-control" type="number" id="inputPublicationYear" name="publicationYear" <%=value%>
+              <input class="form-control" type="number" id="inputPublicationYear" name="publicationYear" value="<%= book ? book.publication_year : ''%>"
               required>
               <div class="invalid-feedback">
                 Publication year required.
@@ -80,7 +80,7 @@
           <div class="mb-3">
             <label for="inputPrice">Price:</label>
             <% if(book !==null) {value="value = " + book.price; } %>
-              <input class="form-control" type="number" id="inputPrice" name="price" <%=value%>
+              <input class="form-control" type="number" id="inputPrice" name="price" value="<%= book ? book.price : ''%>"
               required>
               <div class="invalid-feedback">
                 Price required.
