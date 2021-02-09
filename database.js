@@ -132,7 +132,6 @@ class ShopRepository {
   async retrieve(table, columns, conditions, limit, offset) {
     try {
       var [sql, values] = this.constructSelectQuery(table, columns, conditions, limit, offset);
-      console.log(sql);
 
       var result = await this.pool.query(sql, values);
       return result.rows;
