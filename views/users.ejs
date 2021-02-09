@@ -47,7 +47,7 @@
                 </div>
                 <div>
                     <button class="btn btn-dark" type="submit">Submit</button>
-                  </div>
+                </div>
             </form>
         </div>
         <div>
@@ -101,6 +101,49 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
         crossorigin="anonymous"></script>
+    <script>
+        (function keepFilters() {
+            var email = document.getElementById('filterEmail');
+            var nickname = document.getElementById('filterNickname');
+            var name = document.getElementById('filterName');
+            var surname = document.getElementById('filterSurname');
+            var date = document.getElementById('filterDate');
+            
+            email.addEventListener('change', function () {
+                sessionStorage.setItem('email_autosave', email.value);
+            });
+            nickname.addEventListener('change', function () {
+                sessionStorage.setItem('nickname_autosave', nickname.value);
+            });
+            name.addEventListener('change', function () {
+                sessionStorage.setItem('name_autosave', name.value);
+            });
+            surname.addEventListener('change', function () {
+                sessionStorage.setItem('surname_autosave', surname.value);
+            });
+            date.addEventListener('change', function () {
+                sessionStorage.setItem('date_autosave', date.value);
+            });
+
+
+            if (sessionStorage.getItem('email_autosave')) {
+                email.value = sessionStorage.getItem('email_autosave');
+            }
+            if (sessionStorage.getItem('nickname_autosave')) {
+                nickname.value = sessionStorage.getItem('nickname_autosave');
+            }
+            if (sessionStorage.getItem('name_autosave')) {
+                name.value = sessionStorage.getItem('name_autosave');
+            }
+            if (sessionStorage.getItem('surname_autosave')) {
+                surname.value = sessionStorage.getItem('surname_autosave');
+            }
+            if (sessionStorage.getItem('date_autosave')) {
+                date.value = sessionStorage.getItem('date_autosave');
+            }
+            
+        })();
+    </script>
 </body>
 
 </html>
