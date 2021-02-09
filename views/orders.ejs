@@ -10,102 +10,111 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
   <link rel="stylesheet" href="stylesheets/orders.css">
+  <link rel="stylesheet" href="stylesheets/navbar.css">
+
 </head>
 
 <body class="container text-center" onload='toggleViewRolebased("<%=role%>")'>
-  <h2 class="pt-3 fw-bold">Orders</h2>
-
-  <form method="POST" class="admin-only">
-    <div class="text-start mb-3">
-      <label for="orderId">Order ID:</label>
-      <input class = "form-control" type="number" id="orderId" name="orderId">
-    </div>
-    <div class="text-start mb-3">
-      <label for="userId">User ID:</label>
-      <input class = "form-control" type="text" id="userId" name="userId">
-    </div>
-    <div class="text-start mb-3">
-      <label for="orderId">Date:</label>
-      <input class = "form-control" type="date" id="date" name="date">
-    </div>
-    <div class="text-start mb-3">
-      <label for="status">Status</label>
-      <select class="form-select" id="status" name="status">
-        <option value="Any">Any</option>
-        <option value="Completed">Completed</option>
-        <option value="In progress">In progress</option>
-      </select>
-    </div>
-    <div>
-      <button class="btn btn-dark" type="submit">Submit</button>
-    </div>
-  </form>
+  <header>
+    <%- include('simple_navbar')%>
+  </header>
+  <main class="container">
 
 
-  <table class="table table-striped align-middle text-center table-hover">
-    <thead>
-      <tr>
-        <th scope="col">Order ID</th>
-        <th scope="col" class="admin-only">User ID</th>
-        <th scope="col">Date</th>
-        <th scope="col">Status</th>
-        <th scope="col">Details</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% for(var i=0; i < orders.length; i++){%>
+    <h2 class="pt-3 fw-bold">Orders</h2>
+
+    <form method="POST" class="admin-only">
+      <div class="text-start mb-3">
+        <label for="orderId">Order ID:</label>
+        <input class="form-control" type="number" id="orderId" name="orderId">
+      </div>
+      <div class="text-start mb-3">
+        <label for="userId">User ID:</label>
+        <input class="form-control" type="text" id="userId" name="userId">
+      </div>
+      <div class="text-start mb-3">
+        <label for="orderId">Date:</label>
+        <input class="form-control" type="date" id="date" name="date">
+      </div>
+      <div class="text-start mb-3">
+        <label for="status">Status</label>
+        <select class="form-select" id="status" name="status">
+          <option value="Any">Any</option>
+          <option value="Completed">Completed</option>
+          <option value="In progress">In progress</option>
+        </select>
+      </div>
+      <div>
+        <button class="btn btn-dark" type="submit">Submit</button>
+      </div>
+    </form>
+
+
+    <table class="table table-striped align-middle text-center table-hover">
+      <thead>
         <tr>
-          <th scope="row">
-            <%=orders[i].id%>
-          </th>
-          <td class="admin-only">
-            <%=orders[i].user_id%>
-          </td>
-          <td>
-            <%=orders[i].date%>
-          <td>
-            <%if(orders[i].finished){%> Completed <%}else{%> In progress <%}%>
-          </td>
-          <td>
-            <a href="/order?id=<%=orders[i].id%>">Details</a>
-          </td>
+          <th scope="col">Order ID</th>
+          <th scope="col" class="admin-only">User ID</th>
+          <th scope="col">Date</th>
+          <th scope="col">Status</th>
+          <th scope="col">Details</th>
         </tr>
-        <%}%>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% for(var i=0; i < orders.length; i++){%>
+          <tr>
+            <th scope="row">
+              <%=orders[i].id%>
+            </th>
+            <td class="admin-only">
+              <%=orders[i].user_id%>
+            </td>
+            <td>
+              <%=orders[i].date%>
+            <td>
+              <%if(orders[i].finished){%> Completed <%}else{%> In progress <%}%>
+            </td>
+            <td>
+              <a href="/order?id=<%=orders[i].id%>">Details</a>
+            </td>
+          </tr>
+          <%}%>
+      </tbody>
+    </table>
+  </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
     crossorigin="anonymous"></script>
   <script src="scripts/toggleViewRolebased.js"></script>
   <script>
-    (function keepFilters(){
+    (function keepFilters() {
       var order_id = document.getElementById('orderId');
       var user_id = document.getElementById('userId');
       var status = document.getElementById('status');
       var date = document.getElementById('date');
 
-      order_id.addEventListener('change', function(){
+      order_id.addEventListener('change', function () {
         sessionStorage.setItem('order_id_autosave', order_id.value);
       });
-      user_id.addEventListener('change', function(){
+      user_id.addEventListener('change', function () {
         sessionStorage.setItem('user_id_autosave', user_id.value);
       });
-      status.addEventListener('change', function(){
+      status.addEventListener('change', function () {
         sessionStorage.setItem('status_autosave', status.value);
       });
-      date.addEventListener('change', function(){
+      date.addEventListener('change', function () {
         sessionStorage.setItem('date_autosave', date.value);
       });
-      if(sessionStorage.getItem('order_id_autosave')){
+      if (sessionStorage.getItem('order_id_autosave')) {
         order_id.value = sessionStorage.getItem('order_id_autosave');
       }
-      if(sessionStorage.getItem('user_id_autosave')){
+      if (sessionStorage.getItem('user_id_autosave')) {
         user_id.value = sessionStorage.getItem('user_id_autosave');
       }
-      if(sessionStorage.getItem('status_autosave')){
+      if (sessionStorage.getItem('status_autosave')) {
         status.value = sessionStorage.getItem('status_autosave');
       }
-      if(sessionStorage.getItem('date_autosave')){
+      if (sessionStorage.getItem('date_autosave')) {
         date.value = sessionStorage.getItem('date_autosave');
       }
     })();
