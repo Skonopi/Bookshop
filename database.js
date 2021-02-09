@@ -15,8 +15,9 @@ class ShopRepository {
 
     // Categories of columns used to filter search results.
     this.text_columns = ['title', 'author', 'description', 'name', 'surname'];
-    this.num_columns = ['price', 'publication_year', 'date', 'creation_date'];
-    this.id_columns = ['id', 'genre_id', 'publisher_id', 'mail', 'user_id', 'finished', 'nickname'];
+    this.num_columns = ['price', 'publication_year'];
+    // Columns that require exact match.
+    this.id_columns = ['id', 'genre_id', 'publisher_id', 'mail', 'user_id', 'finished', 'nickname', 'date', 'creation_date'];
 
     // Lists of columns in tables.
     this.users_columns = ['mail', 'nickname', 'name', 'surname', 'password'];
@@ -131,6 +132,7 @@ class ShopRepository {
   async retrieve(table, columns, conditions, limit, offset) {
     try {
       var [sql, values] = this.constructSelectQuery(table, columns, conditions, limit, offset);
+      console.log(sql);
 
       var result = await this.pool.query(sql, values);
       return result.rows;
