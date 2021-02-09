@@ -2,7 +2,7 @@ module.exports = {
   getAllProducts, getSomeProducts, getMatchingProducts, getMatchingProductsCount,
   getProductDetails, getProductDetailsDescriptive, getGenres, getPublishers, 
   insertProduct, deleteProduct, updateProduct,
-  getUsers, getPasswordByMail, getUserById,
+  getUsers, getPasswordByMail, getUserById, getMatchingUsers,
   deleteUser, insertUser, updateUser,
   getOrders, getMatchingOrders, insertOrder
 };
@@ -14,9 +14,9 @@ class ShopRepository {
     this.pool = pool;
 
     // Categories of columns used to filter search results.
-    this.text_columns = ['title', 'author', 'description'];
-    this.num_columns = ['price', 'publication_year', 'date'];
-    this.id_columns = ['id', 'genre_id', 'publisher_id', 'mail', 'user_id', 'finished'];
+    this.text_columns = ['title', 'author', 'description', 'name', 'surname'];
+    this.num_columns = ['price', 'publication_year', 'date', 'creation_date'];
+    this.id_columns = ['id', 'genre_id', 'publisher_id', 'mail', 'user_id', 'finished', 'nickname'];
 
     // Lists of columns in tables.
     this.users_columns = ['mail', 'nickname', 'name', 'surname', 'password'];
@@ -450,7 +450,9 @@ async function updateProduct(id, updates) {
  * Get all users.
  */
 async function getUsers() {
-  var res = await repo.retrieve('users', ['id', 'mail', 'nickname', 'name', 'surname', 'role_id', 'creation_date']);
+  var res = await repo.retrieve('users', [
+    'id', 'mail', 'nickname', 'name', 'surname', 'role_id', 
+    'to_char(creation_date, \'DD.MM.YYYY\') as creation_date']);
   return res;
 }
 
@@ -468,7 +470,27 @@ async function getPasswordByMail(mail) {
  * @param {number} id 
  */
 async function getUserById(id) {
-  var res = await repo.retrieve('users', ['id', 'mail', 'nickname', 'name', 'surname', 'role', 'creation_date'], {'id' : [id]});
+  var res = await repo.retrieve('users', [
+    'id', 'mail', 'nickname', 'name', 'surname', 'role', 
+    'to_char(creation_date, \'DD.MM.YYYY\') as creation_date'], {'id' : [id]});
+  return res;
+}
+
+/**
+ * Get users that match given conditions.
+ * Conditions is a dictionary of form property: list of possible values.
+ * For numeric properties values are lists [min_value, max_value].
+ * If min_value is null, it is treated as -inf. Similarly max_value.
+ * For id properties values are ids.
+ * Valid string properties: mail, nickname, name, surname.
+ * Valid numeric properties: creation_date.
+ * Valid id properties: id, user_id.
+ * @param {object} conditions
+ */
+async function getMatchingUsers(conditions) {
+  var res = await repo.retrieve('users', [
+    'id', 'mail', 'nickname', 'name', 'surname', 'role', 
+    'to_char(creation_date, \'DD.MM.YYYY\') as creation_date'], conditions);
   return res;
 }
 
@@ -525,7 +547,9 @@ function groupProducts(result) {
  * Get all orders.
  */
 async function getOrders() {
-  var res = await repo.retrieve('orders', ['id', 'user_id', 'date', 'address', 'postal_code', 'city', 'finished', 'product_id', 'number']);
+  var res = await repo.retrieve('orders', [
+    'id', 'user_id', 'to_char(date, \'DD.MM.YYYY\') as date', 'address', 
+    'postal_code', 'city', 'finished', 'product_id', 'number']);
   return groupProducts(res);
 }
 
@@ -542,7 +566,9 @@ async function getOrders() {
  * @param {object} conditions
  */
 async function getMatchingOrders(conditions) {
-  var res = await repo.retrieve('orders', ['id', 'user_id', 'date', 'address', 'postal_code', 'city', 'finished', 'product_id', 'number'], conditions);
+  var res = await repo.retrieve('orders', [
+    'id', 'user_id', 'to_char(date, \'DD.MM.YYYY\') as date', 'address', 'postal_code', 
+    'city', 'finished', 'product_id', 'number'], conditions);
   return groupProducts(res);
 }
 
