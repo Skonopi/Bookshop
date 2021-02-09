@@ -255,7 +255,6 @@ app.get('/bookedit', authorize(false,'admin'), async (req,res) => {
         var book;
         try{
             if(!Number.isNaN(bookid)){
-                console.log("HERE "+bookid);
                 book = (await db.getProductDetailsDescriptive(bookid))[0];
             }
             else{
@@ -284,7 +283,8 @@ app.post('/bookedit', upload.single("coverFile"), async (req,res) => {
             author : req.body.author,
             genre : req.body.genre,
             publisher : req.body.publisher,
-            publication_year : parseInt(req.body.publicationYear),
+            publication_year : req.body.publicationYear,
+            price : req.body.price,
             description : req.body.description
         };
 
@@ -343,6 +343,7 @@ app.post('/addbook', async (req,res) => {
             genre : req.body.genre,
             publisher : req.body.publisher,
             publication_year : req.body.publicationYear,
+            price : req.body.price,
             description : req.body.description
         };
         try{
@@ -549,26 +550,15 @@ app.post('/cart', async(req,res) => {
 
 app.get('/users', authorize(false,'admin'), async (req,res) => {
     try{
-        var user ={};
-        if(req.body.filterEmail){
-            user.mail = req.body.filterEmail;
-        }
-        if(req.body.filterNickname){
-            user.nickname = req.body.filterNickname;
-        }
-        if(req.body.filterName){
-            user.name = req.body.filterName;
-        }
-        if(req.body.filterSurname){
-            user.surname = req.body.filterSurname;
-        }
-        if(req.body.filterDate){
-            user.date = req.body.filterDate;
-        }
-        console.log(user);
-        
         try{
-            var users = await db.getUsers();
+            if(req.session.usersFiltr){
+                var user = JSON.parse(req.session.usersFiltr);
+                console.log(user);
+                var users = await db.getMatchingUsers(user);
+            }
+            else{
+                var users = await db.getUsers();
+            }
         }
         catch(error) {
             res.render('error.ejs', { error : {id: 1, description: error}});
@@ -581,6 +571,36 @@ app.get('/users', authorize(false,'admin'), async (req,res) => {
         
         res.render('users.ejs',{users:users});
     } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
+
+app.post('/users',(req,res) => {
+    try{
+        if(req.signedCookies.role=='admin'){
+            var user ={};
+            if(req.body.filterEmail){
+                user.mail = [req.body.filterEmail];
+            }
+            if(req.body.filterNickname){
+                user.nickname = [req.body.filterNickname];
+            }
+            if(req.body.filterName){
+                user.name = [req.body.filterName];
+            }
+            if(req.body.filterSurname){
+                user.surname = [req.body.filterSurname];
+            }
+            if(req.body.filterDate){
+                user.creation_date = [req.body.filterDate];
+            }
+            console.log(user);
+            //console.log(order);
+            req.session.usersFiltr = JSON.stringify(user);
+        }
+        res.redirect('/users');
+    }catch(error){
         console.log(error);
         res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
     }
@@ -611,7 +631,6 @@ app.get('/orders',authorize(false,'admin','client'),async (req,res) => {
     try{
         try{
             if(req.signedCookies.role=='admin'){
-                console.log(req.session);
                 if(req.session.ordersFiltr){
                     var order = JSON.parse(req.session.ordersFiltr);
                     console.log(order);
@@ -640,31 +659,36 @@ app.get('/orders',authorize(false,'admin','client'),async (req,res) => {
 });
 
 app.post('/orders',(req,res) => {
-    if(req.signedCookies.role=='admin'){
-        var order ={};
-        if(req.body.orderId){
-            order.id = [req.body.orderId];
-        }
-        if(req.body.userId){
-            order.user_id = [req.body.userId];
-        }
-        //+1?
-        if(req.body.date){
-            order.date = [req.body.date,req.body.date];
-        }
-        if(req.body.date){
-            if(req.body.date == 'Completed'){
-                order.status = [true];
+    try{
+        if(req.signedCookies.role=='admin'){
+            var order ={};
+            if(req.body.orderId){
+                order.id = [req.body.orderId];
             }
-            if(req.body.date == 'In progress'){
-                order.status = [false];
+            if(req.body.userId){
+                order.user_id = [req.body.userId];
             }
+            //+1?
+            if(req.body.date){
+                order.date = [req.body.date];
+            }
+            if(req.body.status){
+                if(req.body.status == 'Completed'){
+                    order.finished = [true];
+                }
+                if(req.body.status == 'In progress'){
+                    order.finished = [false];
+                }
+            }
+            //console.log(order);
+            req.session.ordersFiltr = JSON.stringify(order);
         }
-        //console.log(order);
-        req.session.ordersFiltr = JSON.stringify(order);
+        res.redirect('/orders');
+    }catch(error){
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
     }
-    res.redirect('/orders');
-})
+});
 
 app.get('/order',async (req,res) => {
     try {

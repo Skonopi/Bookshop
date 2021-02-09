@@ -103,17 +103,17 @@
             <!-- price RANGE -->
             <h4 class="mb-2">Price</h4>
             <div class="input-group mb-3">
-              <input class="form-control" type="number" id="price_min" name="price_min" placeholder="min" />
+              <input class="form-control" type="number" id="price_min" name="price_min" placeholder="min" value="<%=price[0] ? price[0] : ''%>"/>
               <span class="input-group-text">-</span>
-              <input class="form-control" type="number" id="price_max" name="price_max" placeholder="max" />
+              <input class="form-control" type="number" id="price_max" name="price_max" placeholder="max" value="<%=price[1] ? price[1] : ''%>"/>
               <span class="input-group-text">$</span>
             </div>
             <!-- DATE RANGE -->
             <h4 class="mb-2">Publication year</h4>
             <div class="input-group mb-3">
-              <input class="form-control" type="number" id="date_min" name="date_min" placeholder="from" />
+              <input class="form-control" type="number" id="date_min" name="date_min" placeholder="from" value="<%=date[0] ? date[0] : ''%>"/>
               <span class="input-group-text">-</span>
-              <input class="form-control" type="number" id="date_max" name="date_max" placeholder="to" />
+              <input class="form-control" type="number" id="date_max" name="date_max" placeholder="to" value="<%=date[1] ? date[1] : ''%>"/>
               <span class="input-group-text">y</span>
             </div>
             <!-- <div class="range-slider">
