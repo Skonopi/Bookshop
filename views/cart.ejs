@@ -122,7 +122,11 @@
                                     <td>
                                         <%=order.products[i].book.price%>$
                                     </td>
-                                    <td><a>Remove</a></td>
+                                    <td>
+                                        <form method="POST">
+                                            <button class="btn btn-danger" type="submit">Remove</button>
+                                        </form>
+                                    </td>
                                 </tr>
                                 <%}%>
                         </tbody>
