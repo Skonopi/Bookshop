@@ -260,6 +260,7 @@ app.get('/bookedit', authorize(false,'admin'), async (req,res) => {
             else{
                 book = null;
             }
+            console.log(book);
         }
         catch(error) {
             res.render('error.ejs', { error : {id: 1, description: error}});
@@ -287,6 +288,7 @@ app.post('/bookedit', upload.single("coverFile"), async (req,res) => {
             price : req.body.price,
             description : req.body.description
         };
+        console.log(book);
 
         try{
             if(Number.isNaN(bookid)){
@@ -542,6 +544,31 @@ app.post('/cart', async(req,res) => {
         else{
             res.render('error.ejs', { error : {id: 4, description: "Cart is empty"}});
         }
+    } catch (error) {
+        console.log(error);
+        res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});
+    }
+});
+
+app.post("/removeitem",(req,res) => {
+    try{
+        if (req.session.cart){
+            cart = JSON.parse(req.session.cart);
+            var to_del_id = req.body.rem_id;
+            /* console.log("PRZED");
+             console.log(cart);
+             console.log(to_del_id)
+             var products = cart.products;
+             var rem_item = products.find(p => p.book.id == to_del_id);
+             cart.total_cost -= rem_item.book.cost*rem_item.quantity;
+             var newproducts = products.filter(p => p.book.id != to_del_id);
+             cart.products = newproducts;
+             console.log("PO");*/
+            delete(cart[to_del_id]);
+            console.log(cart);
+            req.session.cart = JSON.stringify(cart);
+        }
+        res.redirect("/cart");
     } catch (error) {
         console.log(error);
         res.render('error.ejs', { error : {id: 0, description: "Unexpected error"}});

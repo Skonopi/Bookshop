@@ -91,47 +91,45 @@
                         <%=order.total_cost%>$
                     </span>
                 </h4>
-                <form>
-                    <table class="table table-striped  align-middle table-hover">
-                        <thead>
+                <table class="table table-striped  align-middle table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-start">Book</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(var i=0; i < order.products.length; i++){%>
                             <tr>
-                                <th scope="col" class="text-start">Book</th>
-                                <th scope="col">Quantity</th>
-                                <th scope="col">Price</th>
-                                <th scope="col">Action</th>
+                                <th scope="row">
+                                    <a href="/book?id=<%=order.products[i].book.id%>"><img class=" me-3"
+                                            src=<%=order.products[i].book.image_path%> style="float:left" /></a>
+                                    <p class="text-start">
+                                        <a href="/book?id=<%=order.products[i].book.id%>">
+                                            <%=order.products[i].book.title%>
+                                        </a>
+                                        </br>
+                                        <%=order.products[i].book.author%>
+                                    </p>
+                                </th>
+                                <td>
+                                    <!-- <input class="form-control mx-auto" type="number" value="<%=order.products[i].quantity%>" /> -->
+                                    <%=order.products[i].quantity%>
+                                </td>
+                                <td>
+                                    <%=order.products[i].book.price%>$
+                                </td>
+                                <td>
+                                    <form method="POST" action="/removeitem">
+                                        <button class="btn btn-danger" type="submit" value="<%=order.products[i].book.id%>" name="rem_id">Remove</button>
+                                    </form>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <% for(var i=0; i < order.products.length; i++){%>
-                                <tr>
-                                    <th scope="row">
-                                        <a href="/book?id=<%=order.products[i].book.id%>"><img class=" me-3"
-                                                src=<%=order.products[i].book.image_path%> style="float:left" /></a>
-                                        <p class="text-start">
-                                            <a href="/book?id=<%=order.products[i].book.id%>">
-                                                <%=order.products[i].book.title%>
-                                            </a>
-                                            </br>
-                                            <%=order.products[i].book.author%>
-                                        </p>
-                                    </th>
-                                    <td>
-                                        <!-- <input class="form-control mx-auto" type="number" value="<%=order.products[i].quantity%>" /> -->
-                                        <%=order.products[i].quantity%>
-                                    </td>
-                                    <td>
-                                        <%=order.products[i].book.price%>$
-                                    </td>
-                                    <td>
-                                        <form method="POST">
-                                            <button class="btn btn-danger" type="submit">Remove</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                <%}%>
-                        </tbody>
-                    </table>
-                </form>
+                            <%}%>
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>
