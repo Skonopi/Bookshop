@@ -26,6 +26,7 @@ Link do aplikacji: https://evening-cove-23598.herokuapp.com/
 
 Klient: 
 login: john.watson@wp.pl hasło:123
+
 Administrator:
 login: sherlock.holmes@gmail.com hasło:abc
 
